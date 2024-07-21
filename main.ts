@@ -71,7 +71,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, l
     if (controller.B.isPressed()) {
         kotukutuku_obtained += 1
         tileUtil.replaceAllTiles(assets.tile`berry_2`, sprites.castle.saplingOak)
-        inventory.get_items().push(Inventory.create_item("Kotukutuku", assets.image`myImage2`))
+        toolbar.get_items().push(Inventory.create_item("Kotukutuku", assets.image`myImage2`))
         pause(100)
         compton_himself.sayText("Berry Obtained!", 1000, false)
     }
@@ -117,16 +117,14 @@ function switch_from_hotbar_to_inventory () {
     }
 }
 function create_hotbar_and_inventory () {
-    toolbar = Inventory.create_toolbar([Inventory.create_item("Empty Bottle", assets.image`myImage5`)], 3)
+    toolbar = Inventory.create_toolbar([Inventory.create_item("Empty Bottle", assets.image`myImage7`)], 3)
     toolbar.left = 4
     toolbar.bottom = scene.screenHeight() - 4
     toolbar.z = 100
     toolbar.setFlag(SpriteFlag.RelativeToCamera, true)
     toolbar.setFlag(SpriteFlag.Invisible, true)
-    inventory = Inventory.create_inventory([], 16)
+    inventory = Inventory.create_inventory([], 36)
     inventory.set_number(InventoryNumberAttribute.SelectedIndex, -1)
-    inventory.left = 4
-    inventory.top = 4
     inventory.z = 100
     inventory.setFlag(SpriteFlag.RelativeToCamera, true)
     inventory_enabled = false
@@ -137,10 +135,10 @@ let kotukutuku_obtained = 0
 let kareao_obtained = 0
 let toolbar_enabled = false
 let inventory_enabled = false
-let inventory: Inventory.Inventory = null
 let objectives_shown = 0
 let objectives2: Sprite = null
 let movement = 0
+let inventory: Inventory.Inventory = null
 let compton_himself: Sprite = null
 let main_menu = 0
 let toolbar: Inventory.Toolbar = null
@@ -304,6 +302,7 @@ myMenu.onButtonPressed(controller.B, function (selection, selectedIndex) {
         `)
     tiles.setCurrentTilemap(tilemap`level_1`)
     tiles.placeOnTile(compton_himself, tiles.getTileLocation(15, 36))
+    tiles.placeOnTile(inventory, tiles.getTileLocation(15, 36))
     myMenu.close()
 })
 main_menu = 0
