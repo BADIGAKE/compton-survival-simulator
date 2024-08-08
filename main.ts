@@ -2,28 +2,25 @@ namespace SpriteKind {
     export const objectives = SpriteKind.create()
 }
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
-    compton_himself.sayText("Press e to harvest.", 100, false)
     if (controller.B.isPressed()) {
-        blackberrys_obtained += 1
-        tileUtil.replaceAllTiles(assets.tile`myTile0`, assets.tile`myTile`)
-        inventory.get_items().push(Inventory.create_item("Blackberry", assets.image`myImage4`))
-        pause(100)
-        compton_himself.sayText("Berry Obtained!", 1000, false)
-    }
-})
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (inventory_enabled) {
-        if (controller.up.isPressed()) {
-            if (!(toolbar_enabled)) {
-                inventory.set_number(InventoryNumberAttribute.SelectedIndex, Math.max(inventory.get_number(InventoryNumberAttribute.SelectedIndex) - 8, 0))
-            }
+        toolbar.change_number(ToolbarNumberAttribute.SelectedIndex, -1)
+        if (toolbar.get_items().length == toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+            compton_himself.sayText("My Hands are Full.", 500, false)
+        } else {
+            tileUtil.replaceAllTiles(assets.tile`myTile0`, assets.tile`myTile`)
+            toolbar.get_items().push(Inventory.create_item("Blackberry", assets.image`myImage4`))
+            toolbar.update()
+            pause(100)
+            compton_himself.sayText("Berry Obtained!", 500, false)
+        }
+    } else {
+        if (toolbar.get_items().length < toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+            compton_himself.sayText("Press e to harvest.", 500, false)
         }
     }
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (inventory_enabled) {
-        switch_from_hotbar_to_inventory()
-    } else {
+    if (toolbar_enabled && toolbar_movement_enabled) {
         toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1)
         if (toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1 > toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
             toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
@@ -36,109 +33,113 @@ scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass3, function (spri
     }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (main_menu == 1) {
-        if (objectives_shown == 0) {
-            objectives2 = sprites.create(assets.image`myImage1`, SpriteKind.objectives)
-            objectives_shown = 1
-            scaling.scaleByPercent(objectives2, 70, ScaleDirection.Uniformly, ScaleAnchor.Middle)
-        } else {
-            objectives_shown = 0
-            sprites.destroy(objectives2)
-        }
-    }
-})
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (inventory_enabled) {
-        if (toolbar_enabled) {
-            toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, Math.max(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) - 1, 0))
-        } else {
-            inventory.set_number(InventoryNumberAttribute.SelectedIndex, Math.max(inventory.get_number(InventoryNumberAttribute.SelectedIndex) - 1, 0))
-        }
-    }
-})
-scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_1`, function (sprite, location) {
-    compton_himself.sayText("Press e to harvest.", 100, false)
-    if (controller.B.isPressed()) {
-        kareao_obtained += 1
-        tileUtil.replaceAllTiles(assets.tile`berry_1`, sprites.castle.saplingPine)
-        inventory.get_items().push(Inventory.create_item("Kareao", assets.image`myImage3`))
-        pause(100)
-        compton_himself.sayText("Berry Obtained!", 1000, false)
-    }
-})
-scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, location) {
-    compton_himself.sayText("Press e to harvest.", 100, false)
-    if (controller.B.isPressed()) {
-        kotukutuku_obtained += 1
-        tileUtil.replaceAllTiles(assets.tile`berry_2`, sprites.castle.saplingOak)
-        toolbar.get_items().push(Inventory.create_item("Kotukutuku", assets.image`myImage2`))
-        pause(100)
-        compton_himself.sayText("Berry Obtained!", 1000, false)
-    }
-})
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (inventory_enabled) {
-        if (toolbar_enabled) {
-            toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, Math.min(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1, toolbar.get_number(ToolbarNumberAttribute.MaxItems) - 1))
-        } else {
-            inventory.set_number(InventoryNumberAttribute.SelectedIndex, Math.min(inventory.get_number(InventoryNumberAttribute.SelectedIndex) + 1, inventory.get_items().length - 1))
-        }
-    }
-})
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (inventory_enabled) {
-        if (controller.down.isPressed()) {
-            if (!(toolbar_enabled)) {
-                inventory.set_number(InventoryNumberAttribute.SelectedIndex, Math.min(inventory.get_number(InventoryNumberAttribute.SelectedIndex) + 8, inventory.get_items().length - 1))
+    if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
+        compton_himself.sayText(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_text(ItemTextAttribute.Name), 1000, false)
+        dropped_items = sprites.create(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image(), SpriteKind.Food)
+        scaling.scaleToPercent(dropped_items, 60, ScaleDirection.Uniformly, ScaleAnchor.Middle)
+        dropped_items.setPosition(compton_himself.x, compton_himself.y)
+        dropped_items.z = 98
+        toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
+        toolbar.update()
+    } else {
+        if (main_menu == 1) {
+            if (objectives_shown == 0) {
+                objectives_shown = 1
+                objectives2.setFlag(SpriteFlag.Invisible, false)
+            } else {
+                objectives_shown = 0
+                objectives2.setFlag(SpriteFlag.Invisible, true)
             }
         }
     }
 })
-controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
-    movement = 0
-    inventory_enabled = !(inventory_enabled)
-    inventory.set_number(InventoryNumberAttribute.SelectedIndex, inventory.get_number(InventoryNumberAttribute.SelectedIndex))
-    inventory.setFlag(SpriteFlag.Invisible, !(inventory_enabled))
-    if (!(inventory_enabled)) {
-        movement = 1
-        inventory.set_number(InventoryNumberAttribute.SelectedIndex, -1)
-        toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
-        toolbar_enabled = true
+scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_1`, function (sprite, location) {
+    if (controller.B.isPressed()) {
+        toolbar.change_number(ToolbarNumberAttribute.SelectedIndex, -1)
+        if (toolbar.get_items().length == toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+            compton_himself.sayText("My Hands are Full.", 500, false)
+        } else {
+            tileUtil.replaceAllTiles(assets.tile`berry_1`, sprites.castle.saplingPine)
+            toolbar.get_items().push(Inventory.create_item("Kareao", assets.image`myImage3`))
+            toolbar.update()
+            pause(100)
+            compton_himself.sayText("Berry Obtained!", 500, false)
+        }
+    } else {
+        if (toolbar.get_items().length < toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+            compton_himself.sayText("Press e to harvest.", 500, false)
+        }
     }
 })
-function switch_from_hotbar_to_inventory () {
-    toolbar_enabled = !(toolbar_enabled)
-    if (toolbar_enabled) {
-        inventory.set_number(InventoryNumberAttribute.SelectedIndex, -1)
-        toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
+scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, location) {
+    if (controller.B.isPressed()) {
+        toolbar.change_number(ToolbarNumberAttribute.SelectedIndex, -1)
+        if (toolbar.get_items().length == toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+            compton_himself.sayText("My Hands are Full.", 500, false)
+        } else {
+            tileUtil.replaceAllTiles(assets.tile`berry_2`, sprites.castle.saplingOak)
+            toolbar.get_items().push(Inventory.create_item("Kotukutuku", assets.image`myImage2`))
+            toolbar.update()
+            pause(100)
+            compton_himself.sayText("Berry Obtained!", 500, false)
+        }
     } else {
-        toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
-        inventory.set_number(InventoryNumberAttribute.SelectedIndex, 0)
+        if (toolbar.get_items().length < toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+            compton_himself.sayText("Press e to harvest.", 500, false)
+        }
     }
-}
-function create_hotbar_and_inventory () {
-    toolbar = Inventory.create_toolbar([Inventory.create_item("Empty Bottle", assets.image`myImage7`)], 3)
+})
+function create_hotbar () {
+    toolbar = Inventory.create_toolbar([Inventory.create_item("Empty Bottle", assets.image`no_water`)], 3)
     toolbar.left = 4
     toolbar.bottom = scene.screenHeight() - 4
     toolbar.z = 100
     toolbar.setFlag(SpriteFlag.RelativeToCamera, true)
     toolbar.setFlag(SpriteFlag.Invisible, true)
-    inventory = Inventory.create_inventory([], 36)
-    inventory.set_number(InventoryNumberAttribute.SelectedIndex, -1)
-    inventory.z = 100
-    inventory.setFlag(SpriteFlag.RelativeToCamera, true)
-    inventory_enabled = false
-    inventory.setFlag(SpriteFlag.Invisible, !(inventory_enabled))
-    toolbar_enabled = false
 }
-let kotukutuku_obtained = 0
-let kareao_obtained = 0
+scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function (sprite, location) {
+    toolbar_movement_enabled = false
+    if (controller.B.isPressed() && toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)]) {
+        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`no_water`)) {
+            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Dirty Water", assets.image`dirty_water`)
+            toolbar.update()
+        }
+    }
+})
+controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
+    toolbar_enabled = !(toolbar_enabled)
+    toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
+    if (toolbar_enabled) {
+        toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
+    }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
+    for (let index = 0; index <= image_index.length - 1; index++) {
+        if (otherSprite.image.equals(image_index[index])) {
+            if (toolbar.get_items().length == toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+                if (controller.B.isPressed()) {
+                    compton_himself.sayText("My hands are full", 500, false)
+                }
+            } else {
+                if (controller.B.isPressed()) {
+                    toolbar.get_items().push(Inventory.create_item(text_index[index], otherSprite.image))
+                    toolbar.update()
+                    sprites.destroy(otherSprite)
+                }
+            }
+        }
+    }
+})
+scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
+    toolbar_movement_enabled = true
+})
+let dropped_items: Sprite = null
 let toolbar_enabled = false
-let inventory_enabled = false
 let objectives_shown = 0
-let objectives2: Sprite = null
-let movement = 0
-let inventory: Inventory.Inventory = null
+let objectives2: TextSprite = null
+let toolbar_movement_enabled = false
+let text_index: string[] = []
+let image_index: Image[] = []
 let compton_himself: Sprite = null
 let main_menu = 0
 let toolbar: Inventory.Toolbar = null
@@ -158,7 +159,7 @@ myMenu.setStyleProperty(miniMenu.StyleKind.DefaultAndSelected, miniMenu.StylePro
 myMenu.setPosition(40, 80)
 myMenu.onButtonPressed(controller.B, function (selection, selectedIndex) {
     toolbar.setFlag(SpriteFlag.Invisible, false)
-    toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
+    toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
     compton_himself = sprites.create(img`
         . . . . f f f f . . . . . 
@@ -178,6 +179,7 @@ myMenu.onButtonPressed(controller.B, function (selection, selectedIndex) {
         . . . f f f f f f . . . . 
         . . . f f . . f f . . . . 
         `, SpriteKind.Player)
+    compton_himself.z = 99
     scene.setBackgroundImage(img`
         7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
         7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
@@ -302,13 +304,28 @@ myMenu.onButtonPressed(controller.B, function (selection, selectedIndex) {
         `)
     tiles.setCurrentTilemap(tilemap`level_1`)
     tiles.placeOnTile(compton_himself, tiles.getTileLocation(15, 36))
-    tiles.placeOnTile(inventory, tiles.getTileLocation(15, 36))
     myMenu.close()
 })
+image_index = [
+assets.image`no_water`,
+assets.image`dirty_water`,
+assets.image`clean_water`,
+assets.image`myImage2`,
+assets.image`myImage3`,
+assets.image`myImage4`
+]
+text_index = [
+"Empty Bottle",
+"Dirty Water",
+"Clean Water",
+"Kotukutuku",
+"Kareao",
+"Blackberry"
+]
 main_menu = 0
-let blackberrys_obtained = 0
-movement = 1
+let movement = 1
 let start = 1
+toolbar_movement_enabled = true
 compton_himself = sprites.create(img`
     . . . . f f f f . . . . . 
     . . f f f f f f f f . . . 
@@ -328,24 +345,10 @@ compton_himself = sprites.create(img`
     . . . f f . . f f . . . . 
     `, SpriteKind.Player)
 sprites.destroy(compton_himself)
-objectives2 = sprites.create(assets.image`myImage1`, SpriteKind.objectives)
-sprites.destroy(objectives2)
-scaling.scaleByPercent(objectives2, 70, ScaleDirection.Uniformly, ScaleAnchor.Middle)
+objectives2 = textsprite.create("Objectives", 0, 15)
+objectives2.setFlag(SpriteFlag.Invisible, true)
 objectives_shown = 0
-create_hotbar_and_inventory()
-forever(function () {
-    if (main_menu == 1) {
-        if (compton_himself.vx == 0 && compton_himself.vy == 0) {
-            animation.stopAnimation(animation.AnimationTypes.All, compton_himself)
-        }
-        objectives2.left = 4
-        objectives2.top = 4
-        objectives2.z = 100
-        objectives2.setFlag(SpriteFlag.RelativeToCamera, true)
-        inventory.setPosition(compton_himself.x, compton_himself.y)
-        scene.cameraFollowSprite(compton_himself)
-    }
-})
+create_hotbar()
 forever(function () {
     if (main_menu == 1) {
         if (movement == 1) {
@@ -496,5 +499,17 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
         }
+    }
+})
+forever(function () {
+    if (main_menu == 1) {
+        if (compton_himself.vx == 0 && compton_himself.vy == 0) {
+            animation.stopAnimation(animation.AnimationTypes.All, compton_himself)
+        }
+        objectives2.left = 4
+        objectives2.top = 4
+        objectives2.z = 100
+        objectives2.setFlag(SpriteFlag.RelativeToCamera, true)
+        scene.cameraFollowSprite(compton_himself)
     }
 })

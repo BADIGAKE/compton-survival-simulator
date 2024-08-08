@@ -2,158 +2,159 @@
 class SpriteKind:
     objectives = SpriteKind.create()
 
+def on_overlap_tile(sprite, location):
+    compton_himself.say_text("Press e to harvest.", 100, False)
+    if controller.B.is_pressed():
+        tileUtil.replace_all_tiles(assets.tile("""
+                myTile0
+            """),
+            assets.tile("""
+                myTile
+            """))
+        toolbar.get_items().append(Inventory.create_item("Blackberry", assets.image("""
+            myImage4
+        """)))
+        toolbar.update()
+        pause(100)
+        compton_himself.say_text("Berry Obtained!", 1000, False)
+scene.on_overlap_tile(SpriteKind.player,
+    assets.tile("""
+        myTile0
+    """),
+    on_overlap_tile)
+
 def on_b_pressed():
-    if inventory_enabled:
-        switch_from_hotbar_to_inventory()
-    else:
+    if toolbar_enabled == True:
         toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX,
             toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX) + 1)
         if toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX) + 1 > toolbar.get_number(ToolbarNumberAttribute.MAX_ITEMS):
             toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, 0)
 controller.B.on_event(ControllerButtonEvent.PRESSED, on_b_pressed)
 
-def on_overlap_tile(sprite, location):
+def on_overlap_tile2(sprite2, location2):
     if controller.B.is_pressed():
         tiles.set_current_tilemap(tilemap("""
-            level
+            level0
         """))
 scene.on_overlap_tile(SpriteKind.player,
     sprites.castle.tile_grass3,
-    on_overlap_tile)
-
-def on_overlap_tile2(sprite2, location2):
-    global blackberrys_obtained
-    compton_himself.say_text("Press e to harvest.", 100, False)
-    if controller.B.is_pressed():
-        blackberrys_obtained += 1
-        tileUtil.replace_all_tiles(assets.tile("""
-                myTile15
-            """),
-            assets.tile("""
-                myTile16
-            """))
-        inventory.get_items().append(Inventory.create_item("Blackberry", assets.image("""
-            myImage4
-        """)))
-        pause(100)
-        compton_himself.say_text("Berry Obtained!", 1000, False)
-scene.on_overlap_tile(SpriteKind.player,
-    assets.tile("""
-        myTile15
-    """),
     on_overlap_tile2)
 
 def on_a_pressed():
-    global objectives2, objectives_shown
-    if main_menu == 1:
-        if objectives_shown == 0:
-            objectives2 = sprites.create(assets.image("""
-                myImage0
-            """), SpriteKind.objectives)
-            objectives_shown = 1
-            scaling.scale_by_percent(objectives2,
-                70,
-                ScaleDirection.UNIFORMLY,
-                ScaleAnchor.MIDDLE)
-        else:
-            objectives_shown = 0
-            sprites.destroy(objectives2)
+    global dropped_items, objectives_shown
+    if toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)] and toolbar_enabled:
+        image_index = 0
+        toolbar.get_items().remove_at(toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX))
+        toolbar.update()
+        dropped_items = sprites.create(item_images[image_index], SpriteKind.food)
+        scaling.scale_to_percent(dropped_items,
+            60,
+            ScaleDirection.UNIFORMLY,
+            ScaleAnchor.MIDDLE)
+        dropped_items.set_position(compton_himself.x, compton_himself.y)
+        dropped_items.z = 98
+        compton_himself.say_text(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_text(ItemTextAttribute.DESCRIPTION),
+            1000,
+            False)
+    else:
+        if main_menu == 1:
+            if objectives_shown == 0:
+                objectives_shown = 1
+                objectives2.set_flag(SpriteFlag.INVISIBLE, False)
+            else:
+                objectives_shown = 0
+                objectives2.set_flag(SpriteFlag.INVISIBLE, True)
 controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
 
 def on_overlap_tile3(sprite3, location3):
-    global kareao_obtained
     compton_himself.say_text("Press e to harvest.", 100, False)
     if controller.B.is_pressed():
-        kareao_obtained += 1
         tileUtil.replace_all_tiles(assets.tile("""
-                myTile9
+                berry_1
             """),
             sprites.castle.sapling_pine)
-        inventory.get_items().append(Inventory.create_item("Kareao", assets.image("""
+        toolbar.get_items().append(Inventory.create_item("Kareao", assets.image("""
             myImage3
         """)))
+        toolbar.update()
         pause(100)
         compton_himself.say_text("Berry Obtained!", 1000, False)
 scene.on_overlap_tile(SpriteKind.player,
     assets.tile("""
-        myTile9
+        berry_1
     """),
     on_overlap_tile3)
 
-def on_menu_pressed():
-    global movement, inventory_enabled, toolbar_enabled
-    movement = 0
-    inventory_enabled = not (inventory_enabled)
-    inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX,
-        inventory.get_number(InventoryNumberAttribute.SELECTED_INDEX))
-    inventory.set_flag(SpriteFlag.INVISIBLE, not (inventory_enabled))
-    if not (inventory_enabled):
-        movement = 1
-        inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX, -1)
-        toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, -1)
-        toolbar_enabled = True
-controller.menu.on_event(ControllerButtonEvent.PRESSED, on_menu_pressed)
-
-def switch_from_hotbar_to_inventory():
-    global toolbar_enabled
-    toolbar_enabled = not (toolbar_enabled)
-    if toolbar_enabled:
-        inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX, -1)
-        toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, 0)
+def add_item_to_toolbar():
+    if len(toolbar.get_items()) == toolbar.get_number(ToolbarNumberAttribute.MAX_ITEMS):
+        compton_himself.say_text("My Hands are Full.", 1000, False)
     else:
-        toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, -1)
-        inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX, 0)
-def create_hotbar_and_inventory():
-    global toolbar, inventory, inventory_enabled, toolbar_enabled
-    toolbar = Inventory.create_toolbar([], 3)
+        tileUtil.replace_all_tiles(assets.tile("""
+            berry_2
+        """), sprites.castle.sapling_oak)
+        toolbar.get_items().append(Inventory.create_item("Kotukutuku", assets.image("""
+            myImage2
+        """)))
+        toolbar.update()
+        pause(100)
+        compton_himself.say_text("Berry Obtained!", 1000, False)
+
+def on_overlap_tile4(sprite4, location4):
+    global berry_index
+    compton_himself.say_text("Press e to harvest.", 100, False)
+    if controller.B.is_pressed():
+        add_item_to_toolbar()
+        berry_index = 0
+scene.on_overlap_tile(SpriteKind.player,
+    assets.tile("""
+        berry_2
+    """),
+    on_overlap_tile4)
+
+def create_hotbar():
+    global toolbar
+    toolbar = Inventory.create_toolbar([Inventory.create_item("Empty Bottle",
+                assets.image("""
+                    no_water
+                """),
+                "Empty Bottle")],
+        3)
     toolbar.left = 4
     toolbar.bottom = scene.screen_height() - 4
     toolbar.z = 100
     toolbar.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
     toolbar.set_flag(SpriteFlag.INVISIBLE, True)
-    inventory = Inventory.create_inventory([], 16)
-    inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX, -1)
-    inventory.left = 4
-    inventory.top = 4
-    inventory.z = 100
-    inventory.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
-    inventory_enabled = False
-    inventory.set_flag(SpriteFlag.INVISIBLE, not (inventory_enabled))
-    toolbar_enabled = False
 
-def on_overlap_tile4(sprite4, location4):
-    global kotukutuku_obtained
-    compton_himself.say_text("Press e to harvest.", 100, False)
-    if controller.B.is_pressed():
-        kotukutuku_obtained += 1
-        tileUtil.replace_all_tiles(assets.tile("""
-                myTile14
-            """),
-            sprites.castle.sapling_oak)
-        inventory.get_items().append(Inventory.create_item("Kotukutuku", assets.image("""
-            myImage2
-        """)))
-        pause(100)
-        compton_himself.say_text("Berry Obtained!", 1000, False)
+def on_overlap_tile5(sprite5, location5):
+    if controller.B.is_pressed() and False:
+        toolbar.get_items().remove_at(toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX))
+        toolbar.update()
 scene.on_overlap_tile(SpriteKind.player,
     assets.tile("""
-        myTile14
+        myTile2
     """),
-    on_overlap_tile4)
+    on_overlap_tile5)
 
-kotukutuku_obtained = 0
+def on_menu_pressed():
+    global toolbar_enabled
+    toolbar_enabled = not (toolbar_enabled)
+    toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, -1)
+    if toolbar_enabled:
+        toolbar_enabled = True
+        toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, 0)
+controller.menu.on_event(ControllerButtonEvent.PRESSED, on_menu_pressed)
+
+berry_index = 0
+dropped_items: Sprite = None
 toolbar_enabled = False
-kareao_obtained = 0
-inventory: Inventory.Inventory = None
-inventory_enabled = False
 objectives_shown = 0
-objectives2: Sprite = None
-movement = 0
+objectives2: TextSprite = None
 compton_himself: Sprite = None
 main_menu = 0
 toolbar: Inventory.Toolbar = None
+item_images: List[Image] = []
 scene.set_background_image(assets.image("""
-    myImage5
+    myImage0
 """))
 myMenu = miniMenu.create_menu(miniMenu.create_menu_item("New Game",
         img("""
@@ -169,11 +170,29 @@ myMenu.set_style_property(miniMenu.StyleKind.DEFAULT_AND_SELECTED,
     miniMenu.StyleProperty.BACKGROUND,
     6)
 myMenu.set_position(40, 80)
+item_images = [assets.image("""
+        myImage2
+    """),
+    assets.image("""
+        myImage3
+    """),
+    assets.image("""
+        myImage4
+    """),
+    assets.image("""
+        no_water
+    """),
+    assets.image("""
+        clean_water
+    """),
+    assets.image("""
+        dirty_water
+    """)]
 
 def on_button_pressed(selection, selectedIndex):
     global main_menu, compton_himself
     toolbar.set_flag(SpriteFlag.INVISIBLE, False)
-    toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, 0)
+    toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, -1)
     main_menu = 1
     compton_himself = sprites.create(img("""
             . . . . f f f f . . . . . 
@@ -194,6 +213,7 @@ def on_button_pressed(selection, selectedIndex):
                     . . . f f . . f f . . . .
         """),
         SpriteKind.player)
+    compton_himself.z = 99
     scene.set_background_image(img("""
         7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
                 7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
@@ -324,7 +344,6 @@ def on_button_pressed(selection, selectedIndex):
 myMenu.on_button_pressed(controller.B, on_button_pressed)
 
 main_menu = 0
-blackberrys_obtained = 0
 movement = 1
 start = 1
 compton_himself = sprites.create(img("""
@@ -347,52 +366,12 @@ compton_himself = sprites.create(img("""
     """),
     SpriteKind.player)
 sprites.destroy(compton_himself)
-objectives2 = sprites.create(assets.image("""
-    myImage0
-"""), SpriteKind.objectives)
-sprites.destroy(objectives2)
-scaling.scale_by_percent(objectives2,
-    70,
-    ScaleDirection.UNIFORMLY,
-    ScaleAnchor.MIDDLE)
+objectives2 = textsprite.create("Objectives", 0, 15)
+objectives2.set_flag(SpriteFlag.INVISIBLE, True)
 objectives_shown = 0
-create_hotbar_and_inventory()
+create_hotbar()
 
 def on_forever():
-    if inventory_enabled:
-        if controller.down.is_pressed():
-            if not (toolbar_enabled):
-                inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX,
-                    min(inventory.get_number(InventoryNumberAttribute.SELECTED_INDEX) + 8,
-                        len(inventory.get_items()) - 1))
-        if controller.up.is_pressed():
-            if not (toolbar_enabled):
-                inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX,
-                    max(inventory.get_number(InventoryNumberAttribute.SELECTED_INDEX) - 8,
-                        0))
-        if controller.left.is_pressed():
-            if toolbar_enabled:
-                toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX,
-                    max(toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX) - 1,
-                        0))
-                pause(100)
-            else:
-                inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX,
-                    max(inventory.get_number(InventoryNumberAttribute.SELECTED_INDEX) - 1,
-                        0))
-                pause(100)
-        if controller.right.is_pressed():
-            if toolbar_enabled:
-                toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX,
-                    min(toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX) + 1,
-                        toolbar.get_number(ToolbarNumberAttribute.MAX_ITEMS) - 1))
-            else:
-                inventory.set_number(InventoryNumberAttribute.SELECTED_INDEX,
-                    min(inventory.get_number(InventoryNumberAttribute.SELECTED_INDEX) + 1,
-                        len(inventory.get_items()) - 1))
-forever(on_forever)
-
-def on_forever2():
     if main_menu == 1:
         if compton_himself.vx == 0 and compton_himself.vy == 0:
             animation.stop_animation(animation.AnimationTypes.ALL, compton_himself)
@@ -400,70 +379,18 @@ def on_forever2():
         objectives2.top = 4
         objectives2.z = 100
         objectives2.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
-        inventory.set_position(compton_himself.x, compton_himself.y)
         scene.camera_follow_sprite(compton_himself)
-forever(on_forever2)
+forever(on_forever)
 
-def on_forever3():
+def on_forever2():
     if main_menu == 1:
         if movement == 1:
             if controller.down.is_pressed():
                 compton_himself.vy += 50
                 animation.run_image_animation(compton_himself,
-                    [img("""
-                            . . . . f f f f . . . . . 
-                                                . . f f f f f f f f . . . 
-                                                . f f f f f f c f f f . . 
-                                                f f f f f f c c f f f c . 
-                                                f f f c f f f f f f f c . 
-                                                c c c f f f e e f f c c . 
-                                                f f f f f e e f f c c f . 
-                                                f f f b f e e f b f f f . 
-                                                . f 4 1 f 4 4 f 1 4 f . . 
-                                                . f e 4 4 4 4 4 4 e f . . 
-                                                . f f f e e e e f f f . . 
-                                                f e f b 7 7 7 7 b f e f . 
-                                                e 4 f 7 7 7 7 7 7 f 4 e . 
-                                                e e f 6 6 6 6 6 6 f e e . 
-                                                . . . f f f f f f . . . . 
-                                                . . . f f . . f f . . . .
-                        """),
-                        img("""
-                            . . . . . . . . . . . . . 
-                                                . . . . . f f f f . . . . 
-                                                . . . f f f f f f f f . . 
-                                                . . f f f f f f c f f f . 
-                                                f f f f f f f c c f f f c 
-                                                f f f f c f f f f f f f c 
-                                                . c c c f f f e e f f c c 
-                                                . f f f f f e e f f c c f 
-                                                . f f f b f e e f b f f f 
-                                                . f f 4 1 f 4 4 f 1 4 f f 
-                                                . . f e 4 4 4 4 4 e e f e 
-                                                . f e f b 7 7 7 e 4 4 4 e 
-                                                . e 4 f 7 7 7 7 e 4 4 e . 
-                                                . . . f 6 6 6 6 6 e e . . 
-                                                . . . f f f f f f f . . . 
-                                                . . . f f f . . . . . . .
-                        """),
-                        img("""
-                            . . . . . . . . . . . . . 
-                                                . . . . f f f f . . . . . 
-                                                . . f f f f f f f f . . . 
-                                                . f f f c f f f f f f . . 
-                                                c f f f c c f f f f f f f 
-                                                c f f f f f f f c f f f f 
-                                                c c f f e e f f f c c c . 
-                                                f c c f f e e f f f f f . 
-                                                f f f b f e e f b f f f . 
-                                                f f 4 1 f 4 4 f 1 4 f f . 
-                                                e f e e 4 4 4 4 4 e f . . 
-                                                e 4 4 4 e 7 7 7 b f e f . 
-                                                . e 4 4 e 7 7 7 7 f 4 e . 
-                                                . . e e 6 6 6 6 6 f . . . 
-                                                . . . f f f f f f f . . . 
-                                                . . . . . . . f f f . . .
-                        """)],
+                    assets.animation("""
+                        forward_compy
+                    """),
                     100,
                     True)
                 pause(200)
@@ -532,60 +459,9 @@ def on_forever3():
             if controller.left.is_pressed():
                 compton_himself.vx += -50
                 animation.run_image_animation(compton_himself,
-                    [img("""
-                            . . . . . f f f f f . . . 
-                                                . . . f f f f f f f f f . 
-                                                . . f f f c f f f f f f . 
-                                                . . f f c f f f c f f f f 
-                                                f f c c f f f c c f f c f 
-                                                f f f f f e f f f f c c f 
-                                                . f f f e e f f f f f f f 
-                                                . . f f e e f b f e e f f 
-                                                . . . f 4 4 f 1 e 4 e f . 
-                                                . . . f 4 4 4 4 e f f f . 
-                                                . . . f f e e e e e f . . 
-                                                . . . f 7 7 7 e 4 4 e . . 
-                                                . . . f 7 7 7 e 4 4 e . . 
-                                                . . . f 6 6 6 f e e f . . 
-                                                . . . . f f f f f f . . . 
-                                                . . . . . . f f f . . . .
-                        """),
-                        img("""
-                            . . . . . . . . . . . . . 
-                                                . . . . f f f f f f . . . 
-                                                . . . f f f f f f f f f . 
-                                                . . f f f c f f f f f f . 
-                                                . f f f c f f f c f f f f 
-                                                f f c c f f f c c f f c f 
-                                                f f f f f e f f f f c c f 
-                                                . f f f e e f f f f f f f 
-                                                . . f f e e f b f e e f f 
-                                                . . f f 4 4 f 1 e 4 e f . 
-                                                . . . f 4 4 4 e e f f f . 
-                                                . . . f f e e 4 4 e f . . 
-                                                . . . f 7 7 e 4 4 e f . . 
-                                                . . f f 6 6 f e e f f f . 
-                                                . . f f f f f f f f f f . 
-                                                . . . f f f . . . f f . .
-                        """),
-                        img("""
-                            . . . . . . . . . . . . . 
-                                                . . . . f f f f f f . . . 
-                                                . . . f f f f f f f f f . 
-                                                . . f f f c f f f f f f . 
-                                                . f f f c f f f c f f f f 
-                                                f f c c f f f c c f f c f 
-                                                f f f f f e f f f f c c f 
-                                                . f f f e e f f f f f f f 
-                                                . f f f e e f b f e e f f 
-                                                . . f f 4 4 f 1 e 4 e f f 
-                                                . . . f 4 4 4 4 e f f f . 
-                                                . . . f f e e e e 4 4 4 . 
-                                                . . . f 7 7 7 7 e 4 4 e . 
-                                                . . f f 6 6 6 6 f e e f . 
-                                                . . f f f f f f f f f f . 
-                                                . . . f f f . . . f f . .
-                        """)],
+                    assets.animation("""
+                        left_compy
+                    """),
                     100,
                     True)
                 pause(200)
@@ -651,4 +527,4 @@ def on_forever3():
                     True)
                 pause(200)
                 compton_himself.set_velocity(0, 0)
-forever(on_forever3)
+forever(on_forever2)

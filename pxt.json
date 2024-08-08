@@ -10,7 +10,8 @@
         "arcade-tile-util": "github:microsoft/arcade-tile-util#v1.2.0",
         "Color Fading": "github:jwunderl/pxt-color#v0.2.3",
         "arcade-mini-menu": "github:riknoll/arcade-mini-menu#v0.0.1",
-        "Inventory": "github:UnsignedArduino/Inventory#v1.1.1"
+        "Inventory": "github:UnsignedArduino/Inventory#v1.1.1",
+        "arcade-text": "github:microsoft/arcade-text#v1.3.0"
     },
     "files": [
         "main.blocks",
@@ -27,7 +28,7 @@
         "test.ts"
     ],
     "targetVersions": {
-        "target": "1.12.53",
+        "target": "1.12.55",
         "targetId": "arcade"
     },
     "supportedTargets": [
