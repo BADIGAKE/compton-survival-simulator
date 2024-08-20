@@ -12,7 +12,8 @@
         "arcade-mini-menu": "github:riknoll/arcade-mini-menu#v0.0.1",
         "Inventory": "github:UnsignedArduino/Inventory#v1.1.1",
         "arcade-text": "github:microsoft/arcade-text#v1.3.0",
-        "Custom Keybind Extension": "github:Brohann3214/custom-keybind-extension#ce1cb5acda5cd438592e38da4aaab10b73b46c64"
+        "Custom Keybind Extension": "github:Brohann3214/custom-keybind-extension#ce1cb5acda5cd438592e38da4aaab10b73b46c64",
+        "sevenseg": "*"
     },
     "files": [
         "main.blocks",
@@ -29,7 +30,7 @@
         "test.ts"
     ],
     "targetVersions": {
-        "target": "1.12.55",
+        "target": "1.12.56",
         "targetId": "arcade"
     },
     "supportedTargets": [
