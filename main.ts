@@ -57,11 +57,14 @@ function create_starting_assets () {
     objectives2.setOutline(1, 1)
     objectives2.setFlag(SpriteFlag.Invisible, true)
     objectives_shown = 0
+    update_objectives()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
         if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
             compton_himself.sayText("hydrated", 500, false)
+            water_drunk += 1
+            update_objectives()
             toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Empty Bottle", assets.image`no_water`)
             toolbar.update()
         } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
@@ -70,6 +73,8 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
             for (let index = 0; index <= edible_food.length - 1; index++) {
                 if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(edible_food[index])) {
                     compton_himself.sayText("yummers", 500, false)
+                    yummers_eaten += 1
+                    update_objectives()
                     toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
                     toolbar.update()
                     break;
@@ -94,9 +99,13 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
             if (objectives_shown == 0) {
                 objectives_shown = 1
                 objectives2.setFlag(SpriteFlag.Invisible, false)
+                objectives_food.setFlag(SpriteFlag.Invisible, false)
+                objectives_water.setFlag(SpriteFlag.Invisible, false)
             } else {
                 objectives_shown = 0
                 objectives2.setFlag(SpriteFlag.Invisible, true)
+                objectives_food.setFlag(SpriteFlag.Invisible, true)
+                objectives_water.setFlag(SpriteFlag.Invisible, true)
             }
         }
     }
@@ -344,13 +353,35 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
         }
     }
 })
+function update_objectives () {
+    let yummers_needed = 0
+    if (objectives_shown == 0) {
+        objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
+        objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/1", 0, 15)
+        objectives_food.setFlag(SpriteFlag.Invisible, true)
+        objectives_water.setFlag(SpriteFlag.Invisible, true)
+    } else {
+        sprites.destroy(objectives_food)
+        sprites.destroy(objectives_water)
+        objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
+        objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/1", 0, 15)
+        objectives_food.setFlag(SpriteFlag.Invisible, false)
+        objectives_water.setFlag(SpriteFlag.Invisible, false)
+    }
+    objectives_food.setOutline(1, 1)
+    objectives_water.setOutline(1, 1)
+}
 scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
     toolbar_movement_enabled = true
 })
 let textSprite: TextSprite = null
 let tutorial_enabled = false
 let myMenu: miniMenu.MenuSprite = null
+let objectives_water: TextSprite = null
+let objectives_food: TextSprite = null
 let dropped_items: Sprite = null
+let yummers_eaten = 0
+let water_drunk = 0
 let objectives_shown = 0
 let objectives2: TextSprite = null
 let compton_himself: Sprite = null
@@ -371,12 +402,20 @@ forever(function () {
         if (compton_himself.vx == 0 && compton_himself.vy == 0) {
             animation.stopAnimation(animation.AnimationTypes.All, compton_himself)
         }
-        objectives2.left = 4
-        objectives2.top = 4
-        objectives2.z = 100
-        objectives2.setFlag(SpriteFlag.RelativeToCamera, true)
         scene.cameraFollowSprite(compton_himself)
     }
+    objectives2.left = 4
+    objectives_food.left = 4
+    objectives_water.left = 4
+    objectives2.top = 4
+    objectives_food.top = 15
+    objectives_water.top = 26
+    objectives2.z = 100
+    objectives_food.z = 100
+    objectives_water.z = 100
+    objectives2.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_food.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_water.setFlag(SpriteFlag.RelativeToCamera, true)
 })
 forever(function () {
     if (main_menu == 1) {
