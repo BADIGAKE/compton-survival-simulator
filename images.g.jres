@@ -49,6 +49,11 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "myImage"
     },
+    "image3": {
+        "data": "hwQQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8A8AAADw//Dv/gAA/y9C7+4PAPAiIkT1/v/wLyJEVFX//i9CRERVVe/+LyJEVFX17g/wIkJVVfX/DwAvIkRV9e4PAPAvQkTv7g8AAPAv8v/u/gAAAP8PAO/+AAAAAAAA8A8AAAAAAAAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "myImage1"
+    },
     "!frva,gL": {
         "namespace": "aCvKwxKnlU0",
         "id": "!frva,gL",

@@ -1,5 +1,6 @@
 namespace SpriteKind {
     export const objectives = SpriteKind.create()
+    export const fire = SpriteKind.create()
 }
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
     add_berry(assets.tile`myTile0`, assets.tile`myTile`, assets.image`myImage4`, "Blackberry")
@@ -85,6 +86,14 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         }
     }
 })
+sprites.onCreated(SpriteKind.fire, function (sprite) {
+    animation.runImageAnimation(
+    sprite,
+    assets.animation`myAnim`,
+    200,
+    true
+    )
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
         compton_himself.sayText(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_text(ItemTextAttribute.Name), 1000, false)
@@ -110,7 +119,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         }
     }
 })
-scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile4`, function (sprite, location) {
+sprites.onOverlap(SpriteKind.Player, SpriteKind.fire, function (sprite, otherSprite) {
     toolbar_movement_enabled = false
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B) && toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)]) {
         if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
@@ -272,6 +281,7 @@ function start_game () {
         7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
         `)
     tiles.setCurrentTilemap(tilemap`Level_3`)
+    tileUtil.createSpritesOnTiles(assets.tile`myTile4`, assets.image`myImage1`, SpriteKind.fire)
     tiles.placeOnTile(compton_himself, tiles.getTileLocation(15, 36))
     myMenu.close()
 }
@@ -572,19 +582,22 @@ forever(function () {
 forever(function () {
     if (tutorial_enabled) {
         textSprite = textsprite.create("WASD to move.", 0, 15)
-        textSprite.top = 45
+        textSprite.top = 40
         textSprite.left = 10
         textSprite = textsprite.create(" Menu to on/off hotbar.", 0, 15)
-        textSprite.top = 55
+        textSprite.top = 50
         textSprite.left = 4
         textSprite = textsprite.create(" F to move around hotbar,", 0, 15)
-        textSprite.top = 65
+        textSprite.top = 60
         textSprite.left = 4
         textSprite = textsprite.create("and interact with tiles.", 0, 15)
-        textSprite.top = 75
+        textSprite.top = 70
         textSprite.left = 10
         textSprite = textsprite.create("E to eat selected item.", 0, 15)
-        textSprite.top = 85
+        textSprite.top = 80
+        textSprite.left = 10
+        textSprite = textsprite.create("Q to drop selected item.", 0, 15)
+        textSprite.top = 90
         textSprite.left = 10
         if (controller.player2.isPressed(ControllerButton.B)) {
             start_game()
