@@ -30,6 +30,29 @@ function create_starting_assets () {
     "Kareao",
     "Blackberry"
     ]
+    levels = [
+    tileUtil.createSmallMap(tilemap`Level_1`),
+    tileUtil.createSmallMap(tilemap`Level_2`),
+    tileUtil.createSmallMap(tilemap`Level_3`),
+    tileUtil.createSmallMap(tilemap`Level_4`),
+    tileUtil.createSmallMap(tilemap`Level_5`),
+    tileUtil.createSmallMap(tilemap`Level_6`),
+    tileUtil.createSmallMap(tilemap`Level_7`)
+    ]
+    level_starting_positions = [
+    20,
+    9,
+    15,
+    35,
+    5,
+    25,
+    13,
+    26,
+    9,
+    25,
+    9,
+    44
+    ]
     edible_food = [assets.image`myImage2`, assets.image`myImage3`, assets.image`myImage4`]
     main_menu = 0
     movement = 1
@@ -58,6 +81,9 @@ function create_starting_assets () {
     objectives2.setOutline(1, 1)
     objectives2.setFlag(SpriteFlag.Invisible, true)
     objectives_shown = 0
+    current_level = 1
+    level_position_index = 0
+    objectives_complete = false
     update_objectives()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -280,9 +306,9 @@ function start_game () {
         7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
         7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
         `)
-    tiles.setCurrentTilemap(tilemap`Level_3`)
+    tiles.setCurrentTilemap(tilemap`Level_1`)
     tileUtil.createSpritesOnTiles(assets.tile`myTile4`, assets.image`myImage1`, SpriteKind.fire)
-    tiles.placeOnTile(compton_himself, tiles.getTileLocation(15, 36))
+    tiles.placeOnTile(compton_himself, tiles.getTileLocation(1, 12))
     myMenu.close()
 }
 function starting_menu () {
@@ -311,6 +337,17 @@ function create_hotbar () {
     toolbar.setFlag(SpriteFlag.RelativeToCamera, true)
     toolbar.setFlag(SpriteFlag.Invisible, true)
 }
+scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sprite, location) {
+    if (objectives_complete) {
+        current_level += -2
+        level_position_index += -4
+        tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
+        tiles.setCurrentTilemap(levels[current_level])
+        current_level += 1
+        level_position_index += 2
+        objectives_complete = false
+    }
+})
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function (sprite, location) {
     toolbar_movement_enabled = false
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B) && toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)]) {
@@ -384,6 +421,15 @@ function update_objectives () {
 scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
     toolbar_movement_enabled = true
 })
+scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
+    if (objectives_complete) {
+        tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
+        tiles.setCurrentTilemap(levels[current_level])
+        current_level += 1
+        level_position_index += 2
+        objectives_complete = false
+    }
+})
 let textSprite: TextSprite = null
 let tutorial_enabled = false
 let myMenu: miniMenu.MenuSprite = null
@@ -392,6 +438,9 @@ let objectives_food: TextSprite = null
 let dropped_items: Sprite = null
 let yummers_eaten = 0
 let water_drunk = 0
+let objectives_complete = false
+let level_position_index = 0
+let current_level = 0
 let objectives_shown = 0
 let objectives2: TextSprite = null
 let compton_himself: Sprite = null
@@ -399,6 +448,8 @@ let start = 0
 let movement = 0
 let main_menu = 0
 let edible_food: Image[] = []
+let level_starting_positions: number[] = []
+let levels: tiles.TileMapData[] = []
 let text_index: string[] = []
 let image_index: Image[] = []
 let toolbar: Inventory.Toolbar = null
@@ -431,7 +482,7 @@ forever(function () {
     if (main_menu == 1) {
         if (movement == 1) {
             if (controller.down.isPressed()) {
-                compton_himself.vy += 50
+                compton_himself.vy += 150
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`forward_compy`,
@@ -442,7 +493,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.up.isPressed()) {
-                compton_himself.vy += -50
+                compton_himself.vy += -150
                 animation.runImageAnimation(
                 compton_himself,
                 [img`
@@ -504,7 +555,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.left.isPressed()) {
-                compton_himself.vx += -50
+                compton_himself.vx += -150
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`left_compy`,
@@ -515,7 +566,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.right.isPressed()) {
-                compton_himself.vx += 50
+                compton_himself.vx += 150
                 animation.runImageAnimation(
                 compton_himself,
                 [img`
