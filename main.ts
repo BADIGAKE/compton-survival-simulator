@@ -5,6 +5,22 @@ namespace SpriteKind {
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
     add_berry(assets.tile`myTile0`, assets.tile`myTile`, assets.image`myImage4`, "Blackberry")
 })
+scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, location) {
+    if (shelter_not_found) {
+        movement = 0
+        compton_himself.sayText("Tbis looks like a good place for a shelter.", 1000, false)
+        timer.after(1000, function () {
+            compton_himself.sayText("I should find some sticks and leaves to start building it.", 1000, false)
+            shelter_not_found = false
+            shelter_built = false
+            movement = 1
+        })
+    }
+    if (shelter_not_found == false) {
+        compton_himself.sayText("I should find some sticks and leaves to start building it.", 500, false)
+    }
+    sprites.destroy(objectives_shelter)
+})
 mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function (player2) {
     if (toolbar_enabled && toolbar_movement_enabled) {
         toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1)
@@ -84,6 +100,10 @@ function create_starting_assets () {
     current_level = 1
     level_position_index = 0
     objectives_complete = false
+    shelter_not_found = true
+    shelter_built = true
+    sticks_brought = 0
+    leaves_brought = 0
     update_objectives()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -308,7 +328,7 @@ function start_game () {
         `)
     tiles.setCurrentTilemap(tilemap`Level_1`)
     tileUtil.createSpritesOnTiles(assets.tile`myTile4`, assets.image`myImage1`, SpriteKind.fire)
-    tiles.placeOnTile(compton_himself, tiles.getTileLocation(1, 12))
+    tiles.placeOnTile(compton_himself, tiles.getTileLocation(5, 11))
     myMenu.close()
 }
 function starting_menu () {
@@ -345,7 +365,18 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         tiles.setCurrentTilemap(levels[current_level])
         current_level += 1
         level_position_index += 2
+        yummers_eaten = 0
+        water_drunk = 0
         objectives_complete = false
+    }
+    if (current_level <= 3) {
+        objectives_on = false
+    } else {
+        objectives_on = true
+        if (objectives_shown) {
+            objectives_food.setFlag(SpriteFlag.Invisible, false)
+            objectives_water.setFlag(SpriteFlag.Invisible, false)
+        }
     }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function (sprite, location) {
@@ -401,36 +432,60 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
     }
 })
 function update_objectives () {
-    let yummers_needed = 0
     if (objectives_shown == 0) {
         objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
-        objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/1", 0, 15)
+        objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/" + water_needed, 0, 15)
         objectives_food.setFlag(SpriteFlag.Invisible, true)
         objectives_water.setFlag(SpriteFlag.Invisible, true)
     } else {
         sprites.destroy(objectives_food)
         sprites.destroy(objectives_water)
         objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
-        objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/1", 0, 15)
+        objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/" + water_needed, 0, 15)
         objectives_food.setFlag(SpriteFlag.Invisible, false)
         objectives_water.setFlag(SpriteFlag.Invisible, false)
     }
     objectives_food.setOutline(1, 1)
     objectives_water.setOutline(1, 1)
+    objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
+    objectives_shelter.setOutline(1, 1)
+    objectives_shelter.setFlag(SpriteFlag.Invisible, true)
+    objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/2" + "Sticks", 0, 15)
+    objectives_sticks.setOutline(1, 1)
+    objectives_sticks.setFlag(SpriteFlag.Invisible, true)
+    objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
+    objectives_leaves.setOutline(1, 1)
+    objectives_leaves.setFlag(SpriteFlag.Invisible, true)
 }
 scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
     toolbar_movement_enabled = true
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
-    if (objectives_complete) {
+    if (objectives_complete || current_level <= 3) {
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
         current_level += 1
         level_position_index += 2
+        yummers_eaten = 0
+        water_drunk = 0
         objectives_complete = false
+    }
+    if (current_level <= 3) {
+        objectives_on = false
+    } else {
+        objectives_on = true
+        if (objectives_shown) {
+            objectives_food.setFlag(SpriteFlag.Invisible, false)
+            objectives_water.setFlag(SpriteFlag.Invisible, false)
+        }
     }
 })
 let textSprite: TextSprite = null
+let objectives_leaves: TextSprite = null
+let objectives_sticks: TextSprite = null
+let water_needed = 0
+let yummers_needed = 0
+let objectives_on = false
 let tutorial_enabled = false
 let myMenu: miniMenu.MenuSprite = null
 let objectives_water: TextSprite = null
@@ -438,14 +493,14 @@ let objectives_food: TextSprite = null
 let dropped_items: Sprite = null
 let yummers_eaten = 0
 let water_drunk = 0
+let leaves_brought = 0
+let sticks_brought = 0
 let objectives_complete = false
 let level_position_index = 0
 let current_level = 0
 let objectives_shown = 0
 let objectives2: TextSprite = null
-let compton_himself: Sprite = null
 let start = 0
-let movement = 0
 let main_menu = 0
 let edible_food: Image[] = []
 let level_starting_positions: number[] = []
@@ -455,6 +510,11 @@ let image_index: Image[] = []
 let toolbar: Inventory.Toolbar = null
 let toolbar_movement_enabled = false
 let toolbar_enabled = false
+let objectives_shelter: TextSprite = null
+let shelter_built = false
+let compton_himself: Sprite = null
+let movement = 0
+let shelter_not_found = false
 starting_menu()
 create_starting_assets()
 create_hotbar()
@@ -476,6 +536,18 @@ forever(function () {
     objectives_water.z = 100
     objectives2.setFlag(SpriteFlag.RelativeToCamera, true)
     objectives_food.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_water.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_shelter.left = 4
+    objectives_shelter.top = 15
+    objectives_shelter.z = 100
+    objectives_shelter.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_sticks.left = 4
+    objectives_sticks.top = 15
+    objectives_sticks.z = 100
+    objectives_sticks.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_water.left = 4
+    objectives_water.top = 26
+    objectives_water.z = 100
     objectives_water.setFlag(SpriteFlag.RelativeToCamera, true)
 })
 forever(function () {
@@ -675,4 +747,23 @@ forever(function () {
     Keybinds.CustomKey.UP,
     Keybinds.CustomKey.F
     )
+})
+forever(function () {
+    if (objectives_on == false) {
+        objectives_food.setFlag(SpriteFlag.Invisible, true)
+        objectives_water.setFlag(SpriteFlag.Invisible, true)
+    }
+    if (yummers_eaten == yummers_needed && water_drunk == water_needed) {
+        objectives_complete = true
+    }
+    if (leaves_brought == 0 && sticks_brought == 0) {
+        shelter_built = true
+    }
+    if (shelter_not_found) {
+        if (objectives_shown) {
+            objectives_shelter.setFlag(SpriteFlag.Invisible, false)
+        } else {
+            objectives_shelter.setFlag(SpriteFlag.Invisible, true)
+        }
+    }
 })
