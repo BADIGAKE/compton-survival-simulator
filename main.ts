@@ -13,6 +13,12 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
             compton_himself.sayText("I should find some sticks and leaves to start building it.", 1000, false)
             shelter_not_found = false
             shelter_built = false
+            if (objectives_shown == 1) {
+                objectives_shown = 0
+                objectives2.setFlag(SpriteFlag.Invisible, true)
+                objectives_sticks.setFlag(SpriteFlag.Invisible, true)
+                objectives_leaves.setFlag(SpriteFlag.Invisible, true)
+            }
             movement = 1
         })
     }
@@ -101,7 +107,7 @@ function create_starting_assets () {
     level_position_index = 0
     objectives_complete = false
     shelter_not_found = true
-    shelter_built = true
+    shelter_built = false
     sticks_brought = 0
     leaves_brought = 0
     update_objectives()
@@ -161,14 +167,32 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         if (main_menu == 1) {
             if (objectives_shown == 0) {
                 objectives_shown = 1
-                objectives2.setFlag(SpriteFlag.Invisible, false)
-                objectives_food.setFlag(SpriteFlag.Invisible, false)
-                objectives_water.setFlag(SpriteFlag.Invisible, false)
+                if (shelter_built == false) {
+                    objectives2.setFlag(SpriteFlag.Invisible, false)
+                    objectives_food.setFlag(SpriteFlag.Invisible, false)
+                    objectives_water.setFlag(SpriteFlag.Invisible, false)
+                    if (shelter_not_found == false) {
+                        objectives_sticks.setFlag(SpriteFlag.Invisible, false)
+                        objectives_leaves.setFlag(SpriteFlag.Invisible, false)
+                    }
+                } else {
+                    objectives_food.setFlag(SpriteFlag.Invisible, false)
+                    objectives_water.setFlag(SpriteFlag.Invisible, false)
+                }
             } else {
                 objectives_shown = 0
-                objectives2.setFlag(SpriteFlag.Invisible, true)
-                objectives_food.setFlag(SpriteFlag.Invisible, true)
-                objectives_water.setFlag(SpriteFlag.Invisible, true)
+                if (shelter_built == false) {
+                    objectives2.setFlag(SpriteFlag.Invisible, true)
+                    objectives_food.setFlag(SpriteFlag.Invisible, true)
+                    objectives_water.setFlag(SpriteFlag.Invisible, true)
+                    if (shelter_not_found == false) {
+                        objectives_sticks.setFlag(SpriteFlag.Invisible, true)
+                        objectives_leaves.setFlag(SpriteFlag.Invisible, true)
+                    }
+                } else {
+                    objectives_food.setFlag(SpriteFlag.Invisible, true)
+                    objectives_water.setFlag(SpriteFlag.Invisible, true)
+                }
             }
         }
     }
@@ -458,7 +482,7 @@ function update_objectives () {
     objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
     objectives_shelter.setOutline(1, 1)
     objectives_shelter.setFlag(SpriteFlag.Invisible, true)
-    objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/2" + "Sticks", 0, 15)
+    objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/2" + " Sticks", 0, 15)
     objectives_sticks.setOutline(1, 1)
     objectives_sticks.setFlag(SpriteFlag.Invisible, true)
     objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
@@ -490,8 +514,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
     }
 })
 let textSprite: TextSprite = null
-let objectives_leaves: TextSprite = null
-let objectives_sticks: TextSprite = null
 let water_needed = 0
 let yummers_needed = 0
 let objectives_on = false
@@ -507,8 +529,6 @@ let sticks_brought = 0
 let objectives_complete = false
 let level_position_index = 0
 let current_level = 0
-let objectives_shown = 0
-let objectives2: TextSprite = null
 let start = 0
 let main_menu = 0
 let edible_food: Image[] = []
@@ -520,6 +540,10 @@ let toolbar: Inventory.Toolbar = null
 let toolbar_movement_enabled = false
 let toolbar_enabled = false
 let objectives_shelter: TextSprite = null
+let objectives_leaves: TextSprite = null
+let objectives_sticks: TextSprite = null
+let objectives2: TextSprite = null
+let objectives_shown = 0
 let shelter_built = false
 let compton_himself: Sprite = null
 let movement = 0
@@ -554,16 +578,16 @@ forever(function () {
     objectives_sticks.top = 15
     objectives_sticks.z = 100
     objectives_sticks.setFlag(SpriteFlag.RelativeToCamera, true)
-    objectives_water.left = 4
-    objectives_water.top = 26
-    objectives_water.z = 100
-    objectives_water.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_leaves.left = 4
+    objectives_leaves.top = 26
+    objectives_leaves.z = 100
+    objectives_leaves.setFlag(SpriteFlag.RelativeToCamera, true)
 })
 forever(function () {
     if (main_menu == 1) {
         if (movement == 1) {
             if (controller.down.isPressed()) {
-                compton_himself.vy += 150
+                compton_himself.vy += 250
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`forward_compy`,
@@ -574,7 +598,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.up.isPressed()) {
-                compton_himself.vy += -150
+                compton_himself.vy += -250
                 animation.runImageAnimation(
                 compton_himself,
                 [img`
@@ -636,7 +660,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.left.isPressed()) {
-                compton_himself.vx += -150
+                compton_himself.vx += -250
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`left_compy`,
@@ -647,7 +671,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.right.isPressed()) {
-                compton_himself.vx += 150
+                compton_himself.vx += 250
                 animation.runImageAnimation(
                 compton_himself,
                 [img`
@@ -758,14 +782,14 @@ forever(function () {
     )
 })
 forever(function () {
-    if (objectives_on == false) {
+    if (shelter_built == false) {
         objectives_food.setFlag(SpriteFlag.Invisible, true)
         objectives_water.setFlag(SpriteFlag.Invisible, true)
     }
     if (yummers_eaten == yummers_needed && water_drunk == water_needed) {
         objectives_complete = true
     }
-    if (leaves_brought == 0 && sticks_brought == 0) {
+    if (leaves_brought == 5 && sticks_brought == 2) {
         shelter_built = true
     }
     if (shelter_not_found) {
