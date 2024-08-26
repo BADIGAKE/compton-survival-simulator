@@ -1,31 +1,42 @@
 namespace SpriteKind {
     export const objectives = SpriteKind.create()
     export const fire = SpriteKind.create()
+    export const leaf = SpriteKind.create()
+    export const stick = SpriteKind.create()
 }
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
     add_berry(assets.tile`myTile0`, assets.tile`myTile`, assets.image`myImage4`, "Blackberry")
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, location) {
-    if (shelter_not_found) {
-        movement = 0
-        compton_himself.sayText("Tbis looks like a good place for a shelter.", 1000, false)
-        timer.after(1000, function () {
-            compton_himself.sayText("I should find some sticks and leaves to start building it.", 1000, false)
-            shelter_not_found = false
-            shelter_built = false
-            if (objectives_shown == 1) {
-                objectives_shown = 0
-                objectives2.setFlag(SpriteFlag.Invisible, true)
-                objectives_sticks.setFlag(SpriteFlag.Invisible, true)
-                objectives_leaves.setFlag(SpriteFlag.Invisible, true)
-            }
-            movement = 1
-        })
+    if (shack_materials_collected) {
+        compton_himself.sayText("Press F to build camp with materials.", 200, false)
+        if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
+            tileUtil.coverAllTiles(assets.tile`shelter`, sprites.castle.tilePath5)
+            tileUtil.coverTile(tiles.getTileLocation(25, 18), assets.tile`campfire`)
+            tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
+        }
+    } else {
+        if (shelter_not_found) {
+            movement = 0
+            compton_himself.sayText("Tbis looks like a good place for a shelter.", 1000, false)
+            timer.after(1000, function () {
+                compton_himself.sayText("I should find some sticks and leaves to start building it.", 1000, false)
+                shelter_not_found = false
+                shelter_built = false
+                if (objectives_shown == 1) {
+                    objectives_shown = 0
+                    objectives2.setFlag(SpriteFlag.Invisible, true)
+                    objectives_sticks.setFlag(SpriteFlag.Invisible, true)
+                    objectives_leaves.setFlag(SpriteFlag.Invisible, true)
+                }
+                movement = 1
+            })
+        }
+        if (shelter_not_found == false) {
+            compton_himself.sayText("I should find some sticks and leaves to start building it.", 500, false)
+        }
+        sprites.destroy(objectives_shelter)
     }
-    if (shelter_not_found == false) {
-        compton_himself.sayText("I should find some sticks and leaves to start building it.", 500, false)
-    }
-    sprites.destroy(objectives_shelter)
 })
 mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function (player2) {
     if (toolbar_enabled && toolbar_movement_enabled) {
@@ -33,6 +44,14 @@ mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function
         if (toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1 > toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
             toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
         }
+    }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.stick, function (sprite, otherSprite) {
+    if (shelter_not_found == false) {
+        sticks_brought += 1
+        sprites.destroy(otherSprite)
+        compton_himself.sayText("That's " + sticks_brought + " sticks out of 3", 500, false)
+        update_objectives()
     }
 })
 function create_starting_assets () {
@@ -108,6 +127,7 @@ function create_starting_assets () {
     objectives_complete = false
     shelter_not_found = true
     shelter_built = false
+    shack_materials_collected = false
     sticks_brought = 0
     leaves_brought = 0
     update_objectives()
@@ -195,6 +215,14 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                 }
             }
         }
+    }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.leaf, function (sprite, otherSprite) {
+    if (shelter_not_found == false) {
+        leaves_brought += 1
+        sprites.destroy(otherSprite)
+        compton_himself.sayText("That's " + leaves_brought + " leaves out of 5", 500, false)
+        update_objectives()
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.fire, function (sprite, otherSprite) {
@@ -394,7 +422,9 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         level_position_index += -4
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
-        tileUtil.createSpritesOnTiles(assets.tile`myTile4`, assets.image`myImage1`, SpriteKind.fire)
+        tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
+        tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
+        tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
         current_level += 1
         level_position_index += 2
         yummers_eaten = 0
@@ -467,27 +497,36 @@ function update_objectives () {
     if (objectives_shown == 0) {
         objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
         objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/" + water_needed, 0, 15)
+        objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
+        objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/3" + " Sticks", 0, 15)
+        objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
+        objectives_shelter.setFlag(SpriteFlag.Invisible, true)
+        objectives_sticks.setFlag(SpriteFlag.Invisible, true)
+        objectives_leaves.setFlag(SpriteFlag.Invisible, true)
         objectives_food.setFlag(SpriteFlag.Invisible, true)
         objectives_water.setFlag(SpriteFlag.Invisible, true)
     } else {
+        sprites.destroy(objectives_shelter)
+        sprites.destroy(objectives_sticks)
+        sprites.destroy(objectives_leaves)
         sprites.destroy(objectives_food)
         sprites.destroy(objectives_water)
         objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
         objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/" + water_needed, 0, 15)
+        objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
+        objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/3" + " Sticks", 0, 15)
+        objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
+        objectives_shelter.setFlag(SpriteFlag.Invisible, false)
+        objectives_sticks.setFlag(SpriteFlag.Invisible, false)
+        objectives_leaves.setFlag(SpriteFlag.Invisible, false)
         objectives_food.setFlag(SpriteFlag.Invisible, false)
         objectives_water.setFlag(SpriteFlag.Invisible, false)
     }
     objectives_food.setOutline(1, 1)
     objectives_water.setOutline(1, 1)
-    objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
-    objectives_shelter.setOutline(1, 1)
-    objectives_shelter.setFlag(SpriteFlag.Invisible, true)
-    objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/2" + " Sticks", 0, 15)
-    objectives_sticks.setOutline(1, 1)
-    objectives_sticks.setFlag(SpriteFlag.Invisible, true)
-    objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
     objectives_leaves.setOutline(1, 1)
-    objectives_leaves.setFlag(SpriteFlag.Invisible, true)
+    objectives_sticks.setOutline(1, 1)
+    objectives_shelter.setOutline(1, 1)
 }
 scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
     toolbar_movement_enabled = true
@@ -496,7 +535,9 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
     if (objectives_complete || current_level <= 3) {
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
-        tileUtil.createSpritesOnTiles(assets.tile`myTile4`, assets.image`myImage1`, SpriteKind.fire)
+        tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
+        tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
+        tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
         current_level += 1
         level_position_index += 2
         yummers_eaten = 0
@@ -525,7 +566,6 @@ let dropped_items: Sprite = null
 let yummers_eaten = 0
 let water_drunk = 0
 let leaves_brought = 0
-let sticks_brought = 0
 let objectives_complete = false
 let level_position_index = 0
 let current_level = 0
@@ -536,6 +576,7 @@ let level_starting_positions: number[] = []
 let levels: tiles.TileMapData[] = []
 let text_index: string[] = []
 let image_index: Image[] = []
+let sticks_brought = 0
 let toolbar: Inventory.Toolbar = null
 let toolbar_movement_enabled = false
 let toolbar_enabled = false
@@ -545,9 +586,10 @@ let objectives_sticks: TextSprite = null
 let objectives2: TextSprite = null
 let objectives_shown = 0
 let shelter_built = false
-let compton_himself: Sprite = null
 let movement = 0
 let shelter_not_found = false
+let compton_himself: Sprite = null
+let shack_materials_collected = false
 starting_menu()
 create_starting_assets()
 create_hotbar()
@@ -789,8 +831,8 @@ forever(function () {
     if (yummers_eaten == yummers_needed && water_drunk == water_needed) {
         objectives_complete = true
     }
-    if (leaves_brought == 5 && sticks_brought == 2) {
-        shelter_built = true
+    if (leaves_brought == 5 && sticks_brought == 3) {
+        shack_materials_collected = true
     }
     if (shelter_not_found) {
         if (objectives_shown) {
@@ -798,5 +840,7 @@ forever(function () {
         } else {
             objectives_shelter.setFlag(SpriteFlag.Invisible, true)
         }
+    } else {
+        objectives_shelter.setFlag(SpriteFlag.Invisible, true)
     }
 })
