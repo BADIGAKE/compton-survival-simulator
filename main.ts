@@ -143,11 +143,11 @@ sprites.onCreated(SpriteKind.fire, function (sprite) {
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
         if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`no_water`)) {
-            compton_himself.sayText("I'm going to need this to drink water.")
+            compton_himself.sayText("I'm going to need this to drink water.", 200, false)
         } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
-            compton_himself.sayText("I'm going to need this to drink water.")
+            compton_himself.sayText("I'm going to need this to drink water.", 200, false)
         } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
-            compton_himself.sayText("I'm going to need this to drink water.")
+            compton_himself.sayText("I'm going to need this to drink water.", 200, false)
         } else {
             compton_himself.sayText(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_text(ItemTextAttribute.Name), 1000, false)
             dropped_items = sprites.create(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image(), SpriteKind.Food)
@@ -335,7 +335,6 @@ function start_game () {
         7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
         `)
     tiles.setCurrentTilemap(tilemap`Level_1`)
-    tileUtil.createSpritesOnTiles(assets.tile`myTile4`, assets.image`myImage1`, SpriteKind.fire)
     tiles.placeOnTile(compton_himself, tiles.getTileLocation(5, 11))
     myMenu.close()
 }
@@ -371,6 +370,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         level_position_index += -4
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
+        tileUtil.createSpritesOnTiles(assets.tile`myTile4`, assets.image`myImage1`, SpriteKind.fire)
         current_level += 1
         level_position_index += 2
         yummers_eaten = 0
@@ -472,6 +472,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
     if (objectives_complete || current_level <= 3) {
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
+        tileUtil.createSpritesOnTiles(assets.tile`myTile4`, assets.image`myImage1`, SpriteKind.fire)
         current_level += 1
         level_position_index += 2
         yummers_eaten = 0
