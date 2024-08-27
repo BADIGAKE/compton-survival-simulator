@@ -118,6 +118,14 @@ function create_starting_assets () {
     9,
     44
     ]
+    going_back_level_positions = [
+    44,
+    21,
+    55,
+    29,
+    54,
+    23
+    ]
     edible_food = [assets.image`myImage2`, assets.image`myImage3`, assets.image`myImage4`]
     main_menu = 0
     movement = 1
@@ -448,7 +456,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         transition2()
         current_level += -2
         level_position_index += -4
-        tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
+        tiles.placeOnTile(compton_himself, tiles.getTileLocation(going_back_level_positions[level_position_index - 4], going_back_level_positions[level_position_index - 3]))
         tiles.setCurrentTilemap(levels[current_level])
         tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
         tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
@@ -601,6 +609,7 @@ let current_level = 0
 let start = 0
 let main_menu = 0
 let edible_food: Image[] = []
+let going_back_level_positions: number[] = []
 let level_starting_positions: number[] = []
 let levels: tiles.TileMapData[] = []
 let text_index: string[] = []
