@@ -59,9 +59,11 @@ function transition2 () {
     black_screen.setFlag(SpriteFlag.RelativeToCamera, true)
     black_screen.setPosition(80, 60)
     black_screen.z = 105
-    screenTransitions.startTransition(screenTransitions.Circle, 300, true, true)
-    sprites.destroy(black_screen)
-    screenTransitions.startTransition(screenTransitions.Circle, 1000, false, true)
+    screenTransitions.startTransition(screenTransitions.Circle, 300, true, false)
+    timer.after(300, function () {
+        sprites.destroy(black_screen)
+        screenTransitions.startTransition(screenTransitions.Circle, 1000, false, false)
+    })
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.stick, function (sprite, otherSprite) {
     if (shelter_not_found == false) {
@@ -438,6 +440,7 @@ scene.onOverlapTile(SpriteKind.Player, sprites.castle.tilePath5, function (sprit
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sprite, location) {
     if (objectives_complete) {
+        transition2()
         current_level += -2
         level_position_index += -4
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
@@ -553,6 +556,7 @@ scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (spri
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
     if (objectives_complete || current_level <= 3) {
+        transition2()
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
         tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
