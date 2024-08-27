@@ -9,11 +9,18 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, l
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, location) {
     if (shack_materials_collected) {
-        compton_himself.sayText("Press F to build camp with materials.", 200, false)
-        if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-            tileUtil.coverAllTiles(assets.tile`shelter`, sprites.castle.tilePath5)
-            tileUtil.coverTile(tiles.getTileLocation(25, 18), assets.tile`campfire`)
-            tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
+        if (shelter_built == false) {
+            if (controller.B.isPressed()) {
+                tileUtil.coverAllTiles(assets.tile`shelter`, assets.tile`shelter0`)
+                campfire = sprites.create(assets.image`myImage1`, SpriteKind.fire)
+                tiles.placeOnTile(campfire, tiles.getTileLocation(25, 18))
+                shelter_built = true
+                sprites.destroy(objectives_sticks)
+                sprites.destroy(objectives_leaves)
+                update_objectives()
+            } else {
+                compton_himself.sayText("Press E to build camp with materials.", 200, false)
+            }
         }
     } else {
         if (shelter_not_found) {
@@ -81,8 +88,8 @@ function create_starting_assets () {
     tileUtil.createSmallMap(tilemap`Level_7`)
     ]
     level_starting_positions = [
-    20,
-    9,
+    10,
+    7,
     15,
     35,
     5,
@@ -128,8 +135,8 @@ function create_starting_assets () {
     shelter_not_found = true
     shelter_built = false
     shack_materials_collected = false
-    sticks_brought = 0
-    leaves_brought = 0
+    sticks_brought = 3
+    leaves_brought = 4
     update_objectives()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -187,8 +194,8 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         if (main_menu == 1) {
             if (objectives_shown == 0) {
                 objectives_shown = 1
+                objectives2.setFlag(SpriteFlag.Invisible, false)
                 if (shelter_built == false) {
-                    objectives2.setFlag(SpriteFlag.Invisible, false)
                     objectives_food.setFlag(SpriteFlag.Invisible, false)
                     objectives_water.setFlag(SpriteFlag.Invisible, false)
                     if (shelter_not_found == false) {
@@ -201,8 +208,8 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                 }
             } else {
                 objectives_shown = 0
+                objectives2.setFlag(SpriteFlag.Invisible, true)
                 if (shelter_built == false) {
-                    objectives2.setFlag(SpriteFlag.Invisible, true)
                     objectives_food.setFlag(SpriteFlag.Invisible, true)
                     objectives_water.setFlag(SpriteFlag.Invisible, true)
                     if (shelter_not_found == false) {
@@ -581,14 +588,15 @@ let toolbar: Inventory.Toolbar = null
 let toolbar_movement_enabled = false
 let toolbar_enabled = false
 let objectives_shelter: TextSprite = null
-let objectives_leaves: TextSprite = null
-let objectives_sticks: TextSprite = null
 let objectives2: TextSprite = null
 let objectives_shown = 0
-let shelter_built = false
 let movement = 0
 let shelter_not_found = false
 let compton_himself: Sprite = null
+let objectives_leaves: TextSprite = null
+let objectives_sticks: TextSprite = null
+let campfire: Sprite = null
+let shelter_built = false
 let shack_materials_collected = false
 starting_menu()
 create_starting_assets()
@@ -629,7 +637,7 @@ forever(function () {
     if (main_menu == 1) {
         if (movement == 1) {
             if (controller.down.isPressed()) {
-                compton_himself.vy += 250
+                compton_himself.vy += 100
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`forward_compy`,
@@ -640,7 +648,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.up.isPressed()) {
-                compton_himself.vy += -250
+                compton_himself.vy += -100
                 animation.runImageAnimation(
                 compton_himself,
                 [img`
@@ -702,7 +710,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.left.isPressed()) {
-                compton_himself.vx += -250
+                compton_himself.vx += -100
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`left_compy`,
@@ -713,7 +721,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.right.isPressed()) {
-                compton_himself.vx += 250
+                compton_himself.vx += 100
                 animation.runImageAnimation(
                 compton_himself,
                 [img`
@@ -842,5 +850,9 @@ forever(function () {
         }
     } else {
         objectives_shelter.setFlag(SpriteFlag.Invisible, true)
+    }
+    if (shack_materials_collected) {
+        sprites.destroyAllSpritesOfKind(SpriteKind.stick)
+        sprites.destroyAllSpritesOfKind(SpriteKind.leaf)
     }
 })
