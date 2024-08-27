@@ -1,195 +1,347 @@
 @namespace
 class SpriteKind:
     objectives = SpriteKind.create()
+    fire = SpriteKind.create()
+    leaf = SpriteKind.create()
+    stick = SpriteKind.create()
 
 def on_overlap_tile(sprite, location):
-    compton_himself.say_text("Press e to harvest.", 100, False)
-    if controller.B.is_pressed():
-        tileUtil.replace_all_tiles(assets.tile("""
-                myTile0
-            """),
-            assets.tile("""
-                myTile
-            """))
-        toolbar.get_items().append(Inventory.create_item("Blackberry", assets.image("""
+    add_berry(assets.tile("""
+            myTile0
+        """),
+        assets.tile("""
+            myTile
+        """),
+        assets.image("""
             myImage4
-        """)))
-        toolbar.update()
-        pause(100)
-        compton_himself.say_text("Berry Obtained!", 1000, False)
+        """),
+        "Blackberry")
 scene.on_overlap_tile(SpriteKind.player,
     assets.tile("""
         myTile0
     """),
     on_overlap_tile)
 
-def on_b_pressed():
-    if toolbar_enabled == True:
+def on_overlap_tile2(sprite2, location2):
+    global campfire, shelter_built, movement
+    if shack_materials_collected:
+        if shelter_built == False:
+            if controller.B.is_pressed():
+                tileUtil.cover_all_tiles(assets.tile("""
+                        shelter
+                    """),
+                    assets.tile("""
+                        shelter0
+                    """))
+                campfire = sprites.create(assets.image("""
+                    myImage1
+                """), SpriteKind.fire)
+                tiles.place_on_tile(campfire, tiles.get_tile_location(25, 18))
+                shelter_built = True
+                sprites.destroy(objectives_sticks)
+                sprites.destroy(objectives_leaves)
+                update_objectives()
+            else:
+                compton_himself.say_text("Press E to build camp with materials.", 200, False)
+    else:
+        if shelter_not_found:
+            movement = 0
+            compton_himself.say_text("Tbis looks like a good place for a shelter.", 1000, False)
+            
+            def on_after():
+                global shelter_not_found, shelter_built, objectives_shown, movement
+                compton_himself.say_text("I should find some sticks and leaves to start building it.",
+                    1000,
+                    False)
+                shelter_not_found = False
+                shelter_built = False
+                if objectives_shown == 1:
+                    objectives_shown = 0
+                    objectives2.set_flag(SpriteFlag.INVISIBLE, True)
+                    objectives_sticks.set_flag(SpriteFlag.INVISIBLE, True)
+                    objectives_leaves.set_flag(SpriteFlag.INVISIBLE, True)
+                movement = 1
+            timer.after(1000, on_after)
+            
+        if shelter_not_found == False:
+            compton_himself.say_text("I should find some sticks and leaves to start building it.",
+                500,
+                False)
+        sprites.destroy(objectives_shelter)
+scene.on_overlap_tile(SpriteKind.player,
+    assets.tile("""
+        shelter
+    """),
+    on_overlap_tile2)
+
+def on_button_multiplayer_b_pressed(player2):
+    if toolbar_enabled and toolbar_movement_enabled:
         toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX,
             toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX) + 1)
         if toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX) + 1 > toolbar.get_number(ToolbarNumberAttribute.MAX_ITEMS):
             toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, 0)
+mp.on_button_event(mp.MultiplayerButton.B,
+    ControllerButtonEvent.PRESSED,
+    on_button_multiplayer_b_pressed)
+
+def on_on_overlap(sprite3, otherSprite):
+    global sticks_brought
+    if shelter_not_found == False:
+        sticks_brought += 1
+        sprites.destroy(otherSprite)
+        compton_himself.say_text("That's " + str(sticks_brought) + " sticks out of 3",
+            500,
+            False)
+        update_objectives()
+sprites.on_overlap(SpriteKind.player, SpriteKind.stick, on_on_overlap)
+
+def create_starting_assets():
+    global image_index, text_index, levels, level_starting_positions, edible_food, main_menu, movement, start, toolbar_movement_enabled, compton_himself, objectives2, objectives_shown, current_level, level_position_index, objectives_complete, shelter_not_found, shelter_built, shack_materials_collected, sticks_brought, leaves_brought
+    image_index = [assets.image("""
+            no_water
+        """),
+        assets.image("""
+            dirty_water
+        """),
+        assets.image("""
+            clean_water
+        """),
+        assets.image("""
+            myImage2
+        """),
+        assets.image("""
+            myImage3
+        """),
+        assets.image("""
+            myImage4
+        """)]
+    text_index = ["Empty Bottle",
+        "Dirty Water",
+        "Clean Water",
+        "Kotukutuku",
+        "Kareao",
+        "Blackberry"]
+    levels = [tileUtil.create_small_map(tilemap("""
+            Level_1
+        """)),
+        tileUtil.create_small_map(tilemap("""
+            Level_2
+        """)),
+        tileUtil.create_small_map(tilemap("""
+            Level_3
+        """)),
+        tileUtil.create_small_map(tilemap("""
+            Level_4
+        """)),
+        tileUtil.create_small_map(tilemap("""
+            Level_5
+        """)),
+        tileUtil.create_small_map(tilemap("""
+            Level_6
+        """)),
+        tileUtil.create_small_map(tilemap("""
+            Level_7
+        """))]
+    level_starting_positions = [10, 7, 15, 35, 5, 25, 13, 26, 9, 25, 9, 44]
+    edible_food = [assets.image("""
+            myImage2
+        """),
+        assets.image("""
+            myImage3
+        """),
+        assets.image("""
+            myImage4
+        """)]
+    main_menu = 0
+    movement = 1
+    start = 1
+    toolbar_movement_enabled = True
+    compton_himself = sprites.create(img("""
+            . . . . f f f f . . . . . 
+                    . . f f f f f f f f . . . 
+                    . f f f f f f c f f f . . 
+                    f f f f f f c c f f f c . 
+                    f f f c f f f f f f f c . 
+                    c c c f f f e e f f c c . 
+                    f f f f f e e f f c c f . 
+                    f f f b f e e f b f f f . 
+                    . f 4 1 f 4 4 f 1 4 f . . 
+                    . f e 4 4 4 4 4 4 e f . . 
+                    . f f f e e e e f f f . . 
+                    f e f b 7 7 7 7 b f e f . 
+                    e 4 f 7 7 7 7 7 7 f 4 e . 
+                    e e f 6 6 6 6 6 6 f e e . 
+                    . . . f f f f f f . . . . 
+                    . . . f f . . f f . . . .
+        """),
+        SpriteKind.player)
+    sprites.destroy(compton_himself)
+    objectives2 = textsprite.create("Objectives", 0, 15)
+    objectives2.set_outline(1, 1)
+    objectives2.set_flag(SpriteFlag.INVISIBLE, True)
+    objectives_shown = 0
+    current_level = 1
+    level_position_index = 0
+    objectives_complete = False
+    shelter_not_found = True
+    shelter_built = False
+    shack_materials_collected = False
+    sticks_brought = 3
+    leaves_brought = 4
+    update_objectives()
+
+def on_b_pressed():
+    global water_drunk, yummers_eaten
+    if toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)] and toolbar_enabled:
+        if toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image().equals(assets.image("""
+            clean_water
+        """)):
+            compton_himself.say_text("hydrated", 500, False)
+            water_drunk += 1
+            update_objectives()
+            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)] = Inventory.create_item("Empty Bottle", assets.image("""
+                no_water
+            """))
+            toolbar.update()
+        elif toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image().equals(assets.image("""
+            dirty_water
+        """)):
+            compton_himself.say_text("I cant drink that", 500, False)
+        else:
+            index = 0
+            while index <= len(edible_food) - 1:
+                if toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image().equals(edible_food[index]):
+                    compton_himself.say_text("yummers", 500, False)
+                    yummers_eaten += 1
+                    update_objectives()
+                    toolbar.get_items().remove_at(toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX))
+                    toolbar.update()
+                    break
+                else:
+                    compton_himself.say_text("I cant eat that", 500, False)
+                index += 1
 controller.B.on_event(ControllerButtonEvent.PRESSED, on_b_pressed)
 
-def on_overlap_tile2(sprite2, location2):
-    if controller.B.is_pressed():
-        tiles.set_current_tilemap(tilemap("""
-            level0
-        """))
-scene.on_overlap_tile(SpriteKind.player,
-    sprites.castle.tile_grass3,
-    on_overlap_tile2)
+def on_on_created(sprite4):
+    animation.run_image_animation(sprite4, assets.animation("""
+        myAnim
+    """), 200, True)
+sprites.on_created(SpriteKind.fire, on_on_created)
 
 def on_a_pressed():
     global dropped_items, objectives_shown
     if toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)] and toolbar_enabled:
-        image_index = 0
-        toolbar.get_items().remove_at(toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX))
-        toolbar.update()
-        dropped_items = sprites.create(item_images[image_index], SpriteKind.food)
-        scaling.scale_to_percent(dropped_items,
-            60,
-            ScaleDirection.UNIFORMLY,
-            ScaleAnchor.MIDDLE)
-        dropped_items.set_position(compton_himself.x, compton_himself.y)
-        dropped_items.z = 98
-        compton_himself.say_text(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_text(ItemTextAttribute.DESCRIPTION),
-            1000,
-            False)
+        if toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image().equals(assets.image("""
+            no_water
+        """)):
+            compton_himself.say_text("I'm going to need this to drink water.", 200, False)
+        elif toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image().equals(assets.image("""
+            dirty_water
+        """)):
+            compton_himself.say_text("I'm going to need this to drink water.", 200, False)
+        elif toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image().equals(assets.image("""
+            clean_water
+        """)):
+            compton_himself.say_text("I'm going to need this to drink water.", 200, False)
+        else:
+            compton_himself.say_text(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_text(ItemTextAttribute.NAME),
+                1000,
+                False)
+            dropped_items = sprites.create(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image(),
+                SpriteKind.food)
+            scaling.scale_to_percent(dropped_items,
+                60,
+                ScaleDirection.UNIFORMLY,
+                ScaleAnchor.MIDDLE)
+            dropped_items.set_position(compton_himself.x, compton_himself.y)
+            dropped_items.z = 98
+            toolbar.get_items().remove_at(toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX))
+            toolbar.update()
     else:
         if main_menu == 1:
             if objectives_shown == 0:
                 objectives_shown = 1
                 objectives2.set_flag(SpriteFlag.INVISIBLE, False)
+                if shelter_built == False:
+                    objectives_food.set_flag(SpriteFlag.INVISIBLE, False)
+                    objectives_water.set_flag(SpriteFlag.INVISIBLE, False)
+                    if shelter_not_found == False:
+                        objectives_sticks.set_flag(SpriteFlag.INVISIBLE, False)
+                        objectives_leaves.set_flag(SpriteFlag.INVISIBLE, False)
+                else:
+                    objectives_food.set_flag(SpriteFlag.INVISIBLE, False)
+                    objectives_water.set_flag(SpriteFlag.INVISIBLE, False)
             else:
                 objectives_shown = 0
                 objectives2.set_flag(SpriteFlag.INVISIBLE, True)
+                if shelter_built == False:
+                    objectives_food.set_flag(SpriteFlag.INVISIBLE, True)
+                    objectives_water.set_flag(SpriteFlag.INVISIBLE, True)
+                    if shelter_not_found == False:
+                        objectives_sticks.set_flag(SpriteFlag.INVISIBLE, True)
+                        objectives_leaves.set_flag(SpriteFlag.INVISIBLE, True)
+                else:
+                    objectives_food.set_flag(SpriteFlag.INVISIBLE, True)
+                    objectives_water.set_flag(SpriteFlag.INVISIBLE, True)
 controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
 
-def on_overlap_tile3(sprite3, location3):
-    compton_himself.say_text("Press e to harvest.", 100, False)
-    if controller.B.is_pressed():
-        tileUtil.replace_all_tiles(assets.tile("""
-                berry_1
-            """),
-            sprites.castle.sapling_pine)
-        toolbar.get_items().append(Inventory.create_item("Kareao", assets.image("""
+def on_on_overlap2(sprite5, otherSprite2):
+    global leaves_brought
+    if shelter_not_found == False:
+        leaves_brought += 1
+        sprites.destroy(otherSprite2)
+        compton_himself.say_text("That's " + str(leaves_brought) + " leaves out of 5",
+            500,
+            False)
+        update_objectives()
+sprites.on_overlap(SpriteKind.player, SpriteKind.leaf, on_on_overlap2)
+
+def on_on_overlap3(sprite6, otherSprite3):
+    global toolbar_movement_enabled
+    toolbar_movement_enabled = False
+    if mp.is_button_pressed(mp.player_selector(mp.PlayerNumber.TWO),
+        mp.MultiplayerButton.B) and toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)]:
+        if toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image().equals(assets.image("""
+            dirty_water
+        """)):
+            compton_himself.say_text("Water Boiled!", 500, False)
+            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)] = Inventory.create_item("Clean Water", assets.image("""
+                clean_water
+            """))
+            toolbar.update()
+sprites.on_overlap(SpriteKind.player, SpriteKind.fire, on_on_overlap3)
+
+def on_overlap_tile3(sprite7, location3):
+    add_berry(assets.tile("""
+            berry_1
+        """),
+        sprites.castle.sapling_pine,
+        assets.image("""
             myImage3
-        """)))
-        toolbar.update()
-        pause(100)
-        compton_himself.say_text("Berry Obtained!", 1000, False)
+        """),
+        "Kotukutuku")
 scene.on_overlap_tile(SpriteKind.player,
     assets.tile("""
         berry_1
     """),
     on_overlap_tile3)
 
-def add_item_to_toolbar():
-    if len(toolbar.get_items()) == toolbar.get_number(ToolbarNumberAttribute.MAX_ITEMS):
-        compton_himself.say_text("My Hands are Full.", 1000, False)
-    else:
-        tileUtil.replace_all_tiles(assets.tile("""
+def on_overlap_tile4(sprite8, location4):
+    add_berry(assets.tile("""
             berry_2
-        """), sprites.castle.sapling_oak)
-        toolbar.get_items().append(Inventory.create_item("Kotukutuku", assets.image("""
+        """),
+        sprites.castle.sapling_oak,
+        assets.image("""
             myImage2
-        """)))
-        toolbar.update()
-        pause(100)
-        compton_himself.say_text("Berry Obtained!", 1000, False)
-
-def on_overlap_tile4(sprite4, location4):
-    global berry_index
-    compton_himself.say_text("Press e to harvest.", 100, False)
-    if controller.B.is_pressed():
-        add_item_to_toolbar()
-        berry_index = 0
+        """),
+        "Kotukutuku")
 scene.on_overlap_tile(SpriteKind.player,
     assets.tile("""
         berry_2
     """),
     on_overlap_tile4)
 
-def create_hotbar():
-    global toolbar
-    toolbar = Inventory.create_toolbar([Inventory.create_item("Empty Bottle",
-                assets.image("""
-                    no_water
-                """),
-                "Empty Bottle")],
-        3)
-    toolbar.left = 4
-    toolbar.bottom = scene.screen_height() - 4
-    toolbar.z = 100
-    toolbar.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
-    toolbar.set_flag(SpriteFlag.INVISIBLE, True)
-
-def on_overlap_tile5(sprite5, location5):
-    if controller.B.is_pressed() and False:
-        toolbar.get_items().remove_at(toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX))
-        toolbar.update()
-scene.on_overlap_tile(SpriteKind.player,
-    assets.tile("""
-        myTile2
-    """),
-    on_overlap_tile5)
-
-def on_menu_pressed():
-    global toolbar_enabled
-    toolbar_enabled = not (toolbar_enabled)
-    toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, -1)
-    if toolbar_enabled:
-        toolbar_enabled = True
-        toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, 0)
-controller.menu.on_event(ControllerButtonEvent.PRESSED, on_menu_pressed)
-
-berry_index = 0
-dropped_items: Sprite = None
-toolbar_enabled = False
-objectives_shown = 0
-objectives2: TextSprite = None
-compton_himself: Sprite = None
-main_menu = 0
-toolbar: Inventory.Toolbar = None
-item_images: List[Image] = []
-scene.set_background_image(assets.image("""
-    myImage0
-"""))
-myMenu = miniMenu.create_menu(miniMenu.create_menu_item("New Game",
-        img("""
-            f . . . . . 
-                . f f . . . 
-                . . . f f . 
-                . . . . . f 
-                . . . f f . 
-                . f f . . . 
-                f . . . . .
-        """)))
-myMenu.set_style_property(miniMenu.StyleKind.DEFAULT_AND_SELECTED,
-    miniMenu.StyleProperty.BACKGROUND,
-    6)
-myMenu.set_position(40, 80)
-item_images = [assets.image("""
-        myImage2
-    """),
-    assets.image("""
-        myImage3
-    """),
-    assets.image("""
-        myImage4
-    """),
-    assets.image("""
-        no_water
-    """),
-    assets.image("""
-        clean_water
-    """),
-    assets.image("""
-        dirty_water
-    """)]
-
-def on_button_pressed(selection, selectedIndex):
+def start_game():
     global main_menu, compton_himself
     toolbar.set_flag(SpriteFlag.INVISIBLE, False)
     toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, -1)
@@ -337,56 +489,327 @@ def on_button_pressed(selection, selectedIndex):
                 7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
     """))
     tiles.set_current_tilemap(tilemap("""
-        level_1
+        Level_1
     """))
-    tiles.place_on_tile(compton_himself, tiles.get_tile_location(15, 36))
+    tiles.place_on_tile(compton_himself, tiles.get_tile_location(5, 11))
     myMenu.close()
-myMenu.on_button_pressed(controller.B, on_button_pressed)
+def starting_menu():
+    global myMenu
+    scene.set_background_image(assets.image("""
+        myImage0
+    """))
+    myMenu = miniMenu.create_menu(miniMenu.create_menu_item("New Game"),
+        miniMenu.create_menu_item("Tutorial"))
+    myMenu.set_style_property(miniMenu.StyleKind.DEFAULT_AND_SELECTED,
+        miniMenu.StyleProperty.BACKGROUND,
+        6)
+    myMenu.set_position(35, 80)
+    
+    def on_button_pressed(selection, selectedIndex):
+        global tutorial_enabled
+        if selectedIndex == 0:
+            start_game()
+        else:
+            scene.set_background_image(assets.image("""
+                myImage
+            """))
+            tutorial_enabled = True
+            myMenu.close()
+    myMenu.on_button_pressed(controller.B, on_button_pressed)
+    
+def create_hotbar():
+    global toolbar
+    toolbar = Inventory.create_toolbar([Inventory.create_item("Empty Bottle", assets.image("""
+            no_water
+        """))],
+        3)
+    toolbar.left = 4
+    toolbar.bottom = scene.screen_height() - 4
+    toolbar.z = 100
+    toolbar.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    toolbar.set_flag(SpriteFlag.INVISIBLE, True)
 
-main_menu = 0
-movement = 1
-start = 1
-compton_himself = sprites.create(img("""
-        . . . . f f f f . . . . . 
-            . . f f f f f f f f . . . 
-            . f f f f f f c f f f . . 
-            f f f f f f c c f f f c . 
-            f f f c f f f f f f f c . 
-            c c c f f f e e f f c c . 
-            f f f f f e e f f c c f . 
-            f f f b f e e f b f f f . 
-            . f 4 1 f 4 4 f 1 4 f . . 
-            . f e 4 4 4 4 4 4 e f . . 
-            . f f f e e e e f f f . . 
-            f e f b 7 7 7 7 b f e f . 
-            e 4 f 7 7 7 7 7 7 f 4 e . 
-            e e f 6 6 6 6 6 6 f e e . 
-            . . . f f f f f f . . . . 
-            . . . f f . . f f . . . .
+def on_overlap_tile5(sprite9, location5):
+    global current_level, level_position_index, yummers_eaten, water_drunk, objectives_complete, objectives_on
+    if objectives_complete:
+        current_level += -2
+        level_position_index += -4
+        tiles.place_on_tile(compton_himself,
+            tiles.get_tile_location(level_starting_positions[level_position_index],
+                level_starting_positions[level_position_index + 1]))
+        tiles.set_current_tilemap(levels[current_level])
+        tileUtil.create_sprites_on_tiles(assets.tile("""
+                campfire
+            """),
+            assets.image("""
+                myImage1
+            """),
+            SpriteKind.fire)
+        tileUtil.create_sprites_on_tiles(assets.tile("""
+                sticks
+            """),
+            assets.image("""
+                stick
+            """),
+            SpriteKind.stick)
+        tileUtil.create_sprites_on_tiles(assets.tile("""
+                leaves
+            """),
+            assets.image("""
+                fallen_leaves
+            """),
+            SpriteKind.leaf)
+        current_level += 1
+        level_position_index += 2
+        yummers_eaten = 0
+        water_drunk = 0
+        objectives_complete = False
+    if current_level <= 3:
+        objectives_on = False
+    else:
+        objectives_on = True
+        if objectives_shown:
+            objectives_food.set_flag(SpriteFlag.INVISIBLE, False)
+            objectives_water.set_flag(SpriteFlag.INVISIBLE, False)
+scene.on_overlap_tile(SpriteKind.player,
+    assets.tile("""
+        previous_level
     """),
-    SpriteKind.player)
-sprites.destroy(compton_himself)
-objectives2 = textsprite.create("Objectives", 0, 15)
-objectives2.set_flag(SpriteFlag.INVISIBLE, True)
+    on_overlap_tile5)
+
+def on_overlap_tile6(sprite10, location6):
+    global toolbar_movement_enabled
+    toolbar_movement_enabled = False
+    if mp.is_button_pressed(mp.player_selector(mp.PlayerNumber.TWO),
+        mp.MultiplayerButton.B) and toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)]:
+        if toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)].get_image().equals(assets.image("""
+            no_water
+        """)):
+            compton_himself.say_text("Water Collected!", 500, False)
+            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SELECTED_INDEX)] = Inventory.create_item("Dirty Water", assets.image("""
+                dirty_water
+            """))
+            toolbar.update()
+scene.on_overlap_tile(SpriteKind.player,
+    assets.tile("""
+        myTile2
+    """),
+    on_overlap_tile6)
+
+def on_menu_pressed():
+    global toolbar_enabled
+    toolbar_enabled = not (toolbar_enabled)
+    toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, -1)
+    if toolbar_enabled:
+        toolbar.set_number(ToolbarNumberAttribute.SELECTED_INDEX, 0)
+controller.menu.on_event(ControllerButtonEvent.PRESSED, on_menu_pressed)
+
+def add_berry(initial_tile: Image, end_tile: Image, berry: Image, berry_name: str):
+    if mp.is_button_pressed(mp.player_selector(mp.PlayerNumber.TWO),
+        mp.MultiplayerButton.B):
+        toolbar.change_number(ToolbarNumberAttribute.SELECTED_INDEX, -1)
+        if len(toolbar.get_items()) == toolbar.get_number(ToolbarNumberAttribute.MAX_ITEMS):
+            compton_himself.say_text("My Hands are Full.", 500, False)
+        else:
+            tileUtil.replace_all_tiles(initial_tile, end_tile)
+            toolbar.get_items().append(Inventory.create_item(berry_name, berry))
+            toolbar.update()
+            pause(100)
+            compton_himself.say_text("Berry Obtained!", 500, False)
+    else:
+        if len(toolbar.get_items()) < toolbar.get_number(ToolbarNumberAttribute.MAX_ITEMS):
+            compton_himself.say_text("Press f to harvest.", 500, False)
+
+def on_on_overlap4(sprite11, otherSprite4):
+    index2 = 0
+    while index2 <= len(image_index) - 1:
+        if otherSprite4.image.equals(image_index[index2]):
+            if len(toolbar.get_items()) == toolbar.get_number(ToolbarNumberAttribute.MAX_ITEMS):
+                if mp.is_button_pressed(mp.player_selector(mp.PlayerNumber.TWO),
+                    mp.MultiplayerButton.B):
+                    compton_himself.say_text("My hands are full", 500, False)
+            else:
+                if mp.is_button_pressed(mp.player_selector(mp.PlayerNumber.TWO),
+                    mp.MultiplayerButton.B):
+                    toolbar.get_items().append(Inventory.create_item(text_index[index2], otherSprite4.image))
+                    toolbar.update()
+                    sprites.destroy(otherSprite4)
+        index2 += 1
+sprites.on_overlap(SpriteKind.player, SpriteKind.food, on_on_overlap4)
+
+def update_objectives():
+    global objectives_food, objectives_water, objectives_shelter, objectives_sticks, objectives_leaves
+    if objectives_shown == 0:
+        objectives_food = textsprite.create("Eat Edible Berries: " + str(yummers_eaten) + "/" + str(yummers_needed),
+            0,
+            15)
+        objectives_water = textsprite.create("Drink Clean Water: " + str(water_drunk) + "/" + str(water_needed),
+            0,
+            15)
+        objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
+        objectives_sticks = textsprite.create("Obtain " + str(sticks_brought) + "/3" + " Sticks", 0, 15)
+        objectives_leaves = textsprite.create("Obtain " + str(leaves_brought) + "/5" + " Leaves", 0, 15)
+        objectives_shelter.set_flag(SpriteFlag.INVISIBLE, True)
+        objectives_sticks.set_flag(SpriteFlag.INVISIBLE, True)
+        objectives_leaves.set_flag(SpriteFlag.INVISIBLE, True)
+        objectives_food.set_flag(SpriteFlag.INVISIBLE, True)
+        objectives_water.set_flag(SpriteFlag.INVISIBLE, True)
+    else:
+        sprites.destroy(objectives_shelter)
+        sprites.destroy(objectives_sticks)
+        sprites.destroy(objectives_leaves)
+        sprites.destroy(objectives_food)
+        sprites.destroy(objectives_water)
+        objectives_food = textsprite.create("Eat Edible Berries: " + str(yummers_eaten) + "/" + str(yummers_needed),
+            0,
+            15)
+        objectives_water = textsprite.create("Drink Clean Water: " + str(water_drunk) + "/" + str(water_needed),
+            0,
+            15)
+        objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
+        objectives_sticks = textsprite.create("Obtain " + str(sticks_brought) + "/3" + " Sticks", 0, 15)
+        objectives_leaves = textsprite.create("Obtain " + str(leaves_brought) + "/5" + " Leaves", 0, 15)
+        objectives_shelter.set_flag(SpriteFlag.INVISIBLE, False)
+        objectives_sticks.set_flag(SpriteFlag.INVISIBLE, False)
+        objectives_leaves.set_flag(SpriteFlag.INVISIBLE, False)
+        objectives_food.set_flag(SpriteFlag.INVISIBLE, False)
+        objectives_water.set_flag(SpriteFlag.INVISIBLE, False)
+    objectives_food.set_outline(1, 1)
+    objectives_water.set_outline(1, 1)
+    objectives_leaves.set_outline(1, 1)
+    objectives_sticks.set_outline(1, 1)
+    objectives_shelter.set_outline(1, 1)
+
+def on_overlap_tile7(sprite12, location7):
+    global toolbar_movement_enabled
+    toolbar_movement_enabled = True
+scene.on_overlap_tile(SpriteKind.player,
+    sprites.castle.tile_grass1,
+    on_overlap_tile7)
+
+def on_overlap_tile8(sprite13, location8):
+    global current_level, level_position_index, yummers_eaten, water_drunk, objectives_complete, objectives_on
+    if objectives_complete or current_level <= 3:
+        tiles.place_on_tile(compton_himself,
+            tiles.get_tile_location(level_starting_positions[level_position_index],
+                level_starting_positions[level_position_index + 1]))
+        tiles.set_current_tilemap(levels[current_level])
+        tileUtil.create_sprites_on_tiles(assets.tile("""
+                campfire
+            """),
+            assets.image("""
+                myImage1
+            """),
+            SpriteKind.fire)
+        tileUtil.create_sprites_on_tiles(assets.tile("""
+                sticks
+            """),
+            assets.image("""
+                stick
+            """),
+            SpriteKind.stick)
+        tileUtil.create_sprites_on_tiles(assets.tile("""
+                leaves
+            """),
+            assets.image("""
+                fallen_leaves
+            """),
+            SpriteKind.leaf)
+        current_level += 1
+        level_position_index += 2
+        yummers_eaten = 0
+        water_drunk = 0
+        objectives_complete = False
+    if current_level <= 3:
+        objectives_on = False
+    else:
+        objectives_on = True
+        if objectives_shown:
+            objectives_food.set_flag(SpriteFlag.INVISIBLE, False)
+            objectives_water.set_flag(SpriteFlag.INVISIBLE, False)
+scene.on_overlap_tile(SpriteKind.player,
+    assets.tile("""
+        next_level
+    """),
+    on_overlap_tile8)
+
+textSprite: TextSprite = None
+water_needed = 0
+yummers_needed = 0
+objectives_on = False
+tutorial_enabled = False
+myMenu: miniMenu.MenuSprite = None
+objectives_water: TextSprite = None
+objectives_food: TextSprite = None
+dropped_items: Sprite = None
+yummers_eaten = 0
+water_drunk = 0
+leaves_brought = 0
+objectives_complete = False
+level_position_index = 0
+current_level = 0
+start = 0
+main_menu = 0
+edible_food: List[Image] = []
+level_starting_positions: List[number] = []
+levels: List[tiles.TileMapData] = []
+text_index: List[str] = []
+image_index: List[Image] = []
+sticks_brought = 0
+toolbar: Inventory.Toolbar = None
+toolbar_movement_enabled = False
+toolbar_enabled = False
+objectives_shelter: TextSprite = None
+objectives2: TextSprite = None
 objectives_shown = 0
+movement = 0
+shelter_not_found = False
+compton_himself: Sprite = None
+objectives_leaves: TextSprite = None
+objectives_sticks: TextSprite = None
+campfire: Sprite = None
+shelter_built = False
+shack_materials_collected = False
+starting_menu()
+create_starting_assets()
 create_hotbar()
 
 def on_forever():
     if main_menu == 1:
         if compton_himself.vx == 0 and compton_himself.vy == 0:
             animation.stop_animation(animation.AnimationTypes.ALL, compton_himself)
-        objectives2.left = 4
-        objectives2.top = 4
-        objectives2.z = 100
-        objectives2.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
         scene.camera_follow_sprite(compton_himself)
+    objectives2.left = 4
+    objectives_food.left = 4
+    objectives_water.left = 4
+    objectives2.top = 4
+    objectives_food.top = 15
+    objectives_water.top = 26
+    objectives2.z = 100
+    objectives_food.z = 100
+    objectives_water.z = 100
+    objectives2.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    objectives_food.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    objectives_water.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    objectives_shelter.left = 4
+    objectives_shelter.top = 15
+    objectives_shelter.z = 100
+    objectives_shelter.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    objectives_sticks.left = 4
+    objectives_sticks.top = 15
+    objectives_sticks.z = 100
+    objectives_sticks.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    objectives_leaves.left = 4
+    objectives_leaves.top = 26
+    objectives_leaves.z = 100
+    objectives_leaves.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
 forever(on_forever)
 
 def on_forever2():
     if main_menu == 1:
         if movement == 1:
             if controller.down.is_pressed():
-                compton_himself.vy += 50
+                compton_himself.vy += 100
                 animation.run_image_animation(compton_himself,
                     assets.animation("""
                         forward_compy
@@ -396,7 +819,7 @@ def on_forever2():
                 pause(200)
                 compton_himself.set_velocity(0, 0)
             if controller.up.is_pressed():
-                compton_himself.vy += -50
+                compton_himself.vy += -100
                 animation.run_image_animation(compton_himself,
                     [img("""
                             . . . . f f f f . . . . . 
@@ -457,7 +880,7 @@ def on_forever2():
                 pause(200)
                 compton_himself.set_velocity(0, 0)
             if controller.left.is_pressed():
-                compton_himself.vx += -50
+                compton_himself.vx += -100
                 animation.run_image_animation(compton_himself,
                     assets.animation("""
                         left_compy
@@ -467,7 +890,7 @@ def on_forever2():
                 pause(200)
                 compton_himself.set_velocity(0, 0)
             if controller.right.is_pressed():
-                compton_himself.vx += 50
+                compton_himself.vx += 100
                 animation.run_image_animation(compton_himself,
                     [img("""
                             . . . . . . . . . . . . . 
@@ -528,3 +951,67 @@ def on_forever2():
                 pause(200)
                 compton_himself.set_velocity(0, 0)
 forever(on_forever2)
+
+def on_forever3():
+    global textSprite, tutorial_enabled
+    if tutorial_enabled:
+        textSprite = textsprite.create("WASD to move.", 0, 15)
+        textSprite.top = 40
+        textSprite.left = 10
+        textSprite = textsprite.create(" Menu to on/off hotbar.", 0, 15)
+        textSprite.top = 50
+        textSprite.left = 4
+        textSprite = textsprite.create(" F to move around hotbar,", 0, 15)
+        textSprite.top = 60
+        textSprite.left = 4
+        textSprite = textsprite.create("and interact with tiles.", 0, 15)
+        textSprite.top = 70
+        textSprite.left = 10
+        textSprite = textsprite.create("E to eat selected item.", 0, 15)
+        textSprite.top = 80
+        textSprite.left = 10
+        textSprite = textsprite.create("Q to drop selected item.", 0, 15)
+        textSprite.top = 90
+        textSprite.left = 10
+        if controller.player2.is_pressed(ControllerButton.B):
+            start_game()
+            tutorial_enabled = False
+forever(on_forever3)
+
+def on_forever4():
+    Keybinds.set_simulator_keymap(Keybinds.PlayerNumber.ONE,
+        Keybinds.CustomKey.W,
+        Keybinds.CustomKey.S,
+        Keybinds.CustomKey.A,
+        Keybinds.CustomKey.D,
+        Keybinds.CustomKey.Q,
+        Keybinds.CustomKey.E)
+    Keybinds.set_simulator_keymap(Keybinds.PlayerNumber.TWO,
+        Keybinds.CustomKey.UP,
+        Keybinds.CustomKey.UP,
+        Keybinds.CustomKey.UP,
+        Keybinds.CustomKey.UP,
+        Keybinds.CustomKey.UP,
+        Keybinds.CustomKey.F)
+forever(on_forever4)
+
+def on_forever5():
+    global objectives_complete, shack_materials_collected
+    if shelter_built == False:
+        objectives_food.set_flag(SpriteFlag.INVISIBLE, True)
+        objectives_water.set_flag(SpriteFlag.INVISIBLE, True)
+    if yummers_eaten == yummers_needed and water_drunk == water_needed:
+        objectives_complete = True
+    if leaves_brought == 5 and sticks_brought == 3:
+        shack_materials_collected = True
+    if shelter_not_found:
+        if objectives_shown:
+            objectives_shelter.set_flag(SpriteFlag.INVISIBLE, False)
+        else:
+            objectives_shelter.set_flag(SpriteFlag.INVISIBLE, True)
+    else:
+        objectives_shelter.set_flag(SpriteFlag.INVISIBLE, True)
+    if shack_materials_collected:
+        sprites.destroy_all_sprites_of_kind(SpriteKind.stick)
+        sprites.destroy_all_sprites_of_kind(SpriteKind.leaf)
+forever(on_forever5)

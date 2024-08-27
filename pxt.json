@@ -15,7 +15,8 @@
         "Custom Keybind Extension": "github:Brohann3214/custom-keybind-extension#ce1cb5acda5cd438592e38da4aaab10b73b46c64",
         "sevenseg": "*",
         "Tile Animator": "github:LautaroCeballos/Tiles-Animator#2e87fd85737dcf61210ea9004eac2167c1e59fb6",
-        "Timers": "github:microsoft/arcade-timers#v1.1.0"
+        "Timers": "github:microsoft/arcade-timers#v1.1.0",
+        "arcade-screen-transitions": "github:riknoll/arcade-screen-transitions#v0.1.0"
     },
     "files": [
         "main.blocks",

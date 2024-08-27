@@ -3,6 +3,7 @@ namespace SpriteKind {
     export const fire = SpriteKind.create()
     export const leaf = SpriteKind.create()
     export const stick = SpriteKind.create()
+    export const transition = SpriteKind.create()
 }
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
     add_berry(assets.tile`myTile0`, assets.tile`myTile`, assets.image`myImage4`, "Blackberry")
@@ -15,9 +16,9 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
                 campfire = sprites.create(assets.image`myImage1`, SpriteKind.fire)
                 tiles.placeOnTile(campfire, tiles.getTileLocation(25, 18))
                 shelter_built = true
+                update_objectives()
                 sprites.destroy(objectives_sticks)
                 sprites.destroy(objectives_leaves)
-                update_objectives()
             } else {
                 compton_himself.sayText("Press E to build camp with materials.", 200, false)
             }
@@ -53,6 +54,15 @@ mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function
         }
     }
 })
+function transition2 () {
+    black_screen = sprites.create(assets.image`black_screen`, SpriteKind.transition)
+    black_screen.setFlag(SpriteFlag.RelativeToCamera, true)
+    black_screen.setPosition(80, 60)
+    black_screen.z = 105
+    screenTransitions.startTransition(screenTransitions.Circle, 300, true, true)
+    sprites.destroy(black_screen)
+    screenTransitions.startTransition(screenTransitions.Circle, 1000, false, true)
+}
 sprites.onOverlap(SpriteKind.Player, SpriteKind.stick, function (sprite, otherSprite) {
     if (shelter_not_found == false) {
         sticks_brought += 1
@@ -88,8 +98,8 @@ function create_starting_assets () {
     tileUtil.createSmallMap(tilemap`Level_7`)
     ]
     level_starting_positions = [
-    10,
-    7,
+    11,
+    11,
     15,
     35,
     5,
@@ -423,6 +433,9 @@ function create_hotbar () {
     toolbar.setFlag(SpriteFlag.RelativeToCamera, true)
     toolbar.setFlag(SpriteFlag.Invisible, true)
 }
+scene.onOverlapTile(SpriteKind.Player, sprites.castle.tilePath5, function (sprite, location) {
+    toolbar_movement_enabled = true
+})
 scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sprite, location) {
     if (objectives_complete) {
         current_level += -2
@@ -584,6 +597,7 @@ let levels: tiles.TileMapData[] = []
 let text_index: string[] = []
 let image_index: Image[] = []
 let sticks_brought = 0
+let black_screen: Sprite = null
 let toolbar: Inventory.Toolbar = null
 let toolbar_movement_enabled = false
 let toolbar_enabled = false
