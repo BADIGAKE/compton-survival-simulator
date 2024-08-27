@@ -12,6 +12,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
     if (shack_materials_collected) {
         if (shelter_built == false) {
             if (controller.B.isPressed()) {
+                transition2()
                 tileUtil.coverAllTiles(assets.tile`shelter`, assets.tile`shelter0`)
                 campfire = sprites.create(assets.image`myImage1`, SpriteKind.fire)
                 tiles.placeOnTile(campfire, tiles.getTileLocation(25, 18))
@@ -55,6 +56,7 @@ mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function
     }
 })
 function transition2 () {
+    movement = 0
     black_screen = sprites.create(assets.image`black_screen`, SpriteKind.transition)
     black_screen.setFlag(SpriteFlag.RelativeToCamera, true)
     black_screen.setPosition(80, 60)
@@ -63,6 +65,9 @@ function transition2 () {
     timer.after(300, function () {
         sprites.destroy(black_screen)
         screenTransitions.startTransition(screenTransitions.Circle, 1000, false, false)
+        timer.after(700, function () {
+            movement = 1
+        })
     })
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.stick, function (sprite, otherSprite) {
@@ -857,7 +862,7 @@ forever(function () {
     if (yummers_eaten == yummers_needed && water_drunk == water_needed) {
         objectives_complete = true
     }
-    if (leaves_brought == 5 && sticks_brought == 3) {
+    if (leaves_brought >= 5 && sticks_brought >= 3) {
         shack_materials_collected = true
     }
     if (shelter_not_found) {
