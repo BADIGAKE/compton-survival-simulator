@@ -147,7 +147,7 @@ function create_starting_assets () {
     ]
     edible_food = [assets.image`myImage2`, assets.image`myImage3`, assets.image`myImage4`]
     main_menu = 0
-    movement = 1
+    movement = 0
     start = 1
     toolbar_movement_enabled = true
     compton_himself = sprites.create(img`
@@ -442,6 +442,30 @@ function start_game () {
     tiles.setCurrentTilemap(tilemap`Level_1`)
     tiles.placeOnTile(compton_himself, tiles.getTileLocation(5, 11))
     myMenu.close()
+    timer.after(4000, function () {
+        compton_himself.sayText("Ugh, what happened?", 2500, false)
+        timer.after(2500, function () {
+            compton_himself.sayText("I remember being on a hike a moment ago...", 2500, false)
+            timer.after(2500, function () {
+                compton_himself.sayText("Must've lost my footing and knocked myself out somehow.", 3000, false)
+                timer.after(3000, function () {
+                    compton_himself.sayText("And I've lost all my gear!", 2500, false)
+                    timer.after(2500, function () {
+                        compton_himself.sayText("I should look around incase there's any still here.", 2509, false)
+                        timer.after(2500, function () {
+                            compton_himself.sayText("And I'll have to make a shelter before night", 2500, false)
+                            timer.after(2500, function () {
+                                compton_himself.sayText("Best get going then!", 2000, false)
+                                timer.after(1500, function () {
+                                    movement = 1
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+        })
+    })
 }
 function starting_menu () {
     scene.setBackgroundImage(assets.image`myImage0`)
@@ -842,6 +866,26 @@ forever(function () {
     }
 })
 forever(function () {
+    Keybinds.setSimulatorKeymap(
+    Keybinds.PlayerNumber.ONE,
+    Keybinds.CustomKey.W,
+    Keybinds.CustomKey.S,
+    Keybinds.CustomKey.A,
+    Keybinds.CustomKey.D,
+    Keybinds.CustomKey.Q,
+    Keybinds.CustomKey.E
+    )
+    Keybinds.setSimulatorKeymap(
+    Keybinds.PlayerNumber.TWO,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.F
+    )
+})
+forever(function () {
     if (tutorial_enabled) {
         textSprite = textsprite.create("WASD to move.", 0, 15)
         textSprite.top = 40
@@ -866,26 +910,6 @@ forever(function () {
             tutorial_enabled = false
         }
     }
-})
-forever(function () {
-    Keybinds.setSimulatorKeymap(
-    Keybinds.PlayerNumber.ONE,
-    Keybinds.CustomKey.W,
-    Keybinds.CustomKey.S,
-    Keybinds.CustomKey.A,
-    Keybinds.CustomKey.D,
-    Keybinds.CustomKey.Q,
-    Keybinds.CustomKey.E
-    )
-    Keybinds.setSimulatorKeymap(
-    Keybinds.PlayerNumber.TWO,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.F
-    )
 })
 forever(function () {
     if (shelter_built == false) {
