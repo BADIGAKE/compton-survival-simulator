@@ -46,14 +46,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
         sprites.destroy(objectives_shelter)
     }
 })
-mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function (player2) {
-    if (toolbar_enabled && toolbar_movement_enabled) {
-        toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1)
-        if (toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1 > toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
-            toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
-        }
-    }
-})
 function transition2 (text: string, text2: string, text3: string) {
     movement = 0
     black_screen = sprites.create(assets.image`black_screen`, SpriteKind.transition)
@@ -559,15 +551,15 @@ function add_berry (initial_tile: Image, end_tile: Image, berry: Image, berry_na
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
-    for (let index = 0; index <= image_index.length - 1; index++) {
-        if (otherSprite.image.equals(image_index[index])) {
+    for (let index2 = 0; index2 <= image_index.length - 1; index2++) {
+        if (otherSprite.image.equals(image_index[index2])) {
             if (toolbar.get_items().length == toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
                 if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
                     compton_himself.sayText("My hands are full", 500, false)
                 }
             } else {
                 if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-                    toolbar.get_items().push(Inventory.create_item(text_index[index], otherSprite.image))
+                    toolbar.get_items().push(Inventory.create_item(text_index[index2], otherSprite.image))
                     toolbar.update()
                     sprites.destroy(otherSprite)
                 }
@@ -580,29 +572,31 @@ function update_objectives () {
         objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
         objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/" + water_needed, 0, 15)
         objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
-        objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/3" + " Sticks", 0, 15)
-        objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
         objectives_shelter.setFlag(SpriteFlag.Invisible, true)
-        objectives_sticks.setFlag(SpriteFlag.Invisible, true)
-        objectives_leaves.setFlag(SpriteFlag.Invisible, true)
         objectives_food.setFlag(SpriteFlag.Invisible, true)
         objectives_water.setFlag(SpriteFlag.Invisible, true)
+        objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/3" + " Sticks", 0, 15)
+        objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
+        objectives_sticks.setFlag(SpriteFlag.Invisible, true)
+        objectives_leaves.setFlag(SpriteFlag.Invisible, true)
     } else {
         sprites.destroy(objectives_shelter)
-        sprites.destroy(objectives_sticks)
-        sprites.destroy(objectives_leaves)
         sprites.destroy(objectives_food)
         sprites.destroy(objectives_water)
         objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
         objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/" + water_needed, 0, 15)
         objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
-        objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/3" + " Sticks", 0, 15)
-        objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
-        objectives_shelter.setFlag(SpriteFlag.Invisible, false)
-        objectives_sticks.setFlag(SpriteFlag.Invisible, false)
-        objectives_leaves.setFlag(SpriteFlag.Invisible, false)
         objectives_food.setFlag(SpriteFlag.Invisible, false)
         objectives_water.setFlag(SpriteFlag.Invisible, false)
+        objectives_shelter.setFlag(SpriteFlag.Invisible, false)
+        if (shelter_built == false) {
+            sprites.destroy(objectives_sticks)
+            sprites.destroy(objectives_leaves)
+            objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/3" + " Sticks", 0, 15)
+            objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
+            objectives_sticks.setFlag(SpriteFlag.Invisible, false)
+            objectives_leaves.setFlag(SpriteFlag.Invisible, false)
+        }
     }
     objectives_food.setOutline(1, 1)
     objectives_water.setOutline(1, 1)
@@ -612,6 +606,14 @@ function update_objectives () {
 }
 scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
     toolbar_movement_enabled = true
+})
+mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function (player2) {
+    if (toolbar_enabled && toolbar_movement_enabled) {
+        toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1)
+        if (toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1 > toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+            toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
+        }
+    }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
     if (objectives_complete || current_level <= 3) {
@@ -648,10 +650,13 @@ let objectives_food: TextSprite = null
 let dropped_items: Sprite = null
 let yummers_eaten = 0
 let water_drunk = 0
+let toolbar_enabled = false
+let toolbar: Inventory.Toolbar = null
 let leaves_brought = 0
 let objectives_complete = false
 let level_position_index = 0
 let current_level = 0
+let toolbar_movement_enabled = false
 let start = 0
 let main_menu = 0
 let edible_food: Image[] = []
@@ -665,9 +670,6 @@ let transition_text3: TextSprite = null
 let transition_text2: TextSprite = null
 let transition_text: TextSprite = null
 let black_screen: Sprite = null
-let toolbar: Inventory.Toolbar = null
-let toolbar_movement_enabled = false
-let toolbar_enabled = false
 let objectives_shelter: TextSprite = null
 let objectives2: TextSprite = null
 let objectives_shown = 0
