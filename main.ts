@@ -12,9 +12,8 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
     if (shack_materials_collected) {
         if (shelter_built == false) {
             if (controller.B.isPressed()) {
-                transition2()
+                transition2("You finish building your", "campsite using the materials", "that you collected.")
                 tileUtil.coverAllTiles(assets.tile`shelter`, assets.tile`shelter0`)
-                campfire = sprites.create(assets.image`myImage1`, SpriteKind.fire)
                 tiles.placeOnTile(campfire, tiles.getTileLocation(25, 18))
                 shelter_built = true
                 update_objectives()
@@ -55,15 +54,35 @@ mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function
         }
     }
 })
-function transition2 () {
+function transition2 (text: string, text2: string, text3: string) {
     movement = 0
     black_screen = sprites.create(assets.image`black_screen`, SpriteKind.transition)
     black_screen.setFlag(SpriteFlag.RelativeToCamera, true)
     black_screen.setPosition(80, 60)
     black_screen.z = 105
-    screenTransitions.startTransition(screenTransitions.Circle, 300, true, false)
-    timer.after(300, function () {
+    transition_text = textsprite.create("", 0, 1)
+    transition_text.setFlag(SpriteFlag.Invisible, false)
+    transition_text.setText(text)
+    transition_text.setFlag(SpriteFlag.RelativeToCamera, true)
+    transition_text.setPosition(80, 50)
+    transition_text.z = 105
+    transition_text2 = textsprite.create("", 0, 1)
+    transition_text2.setFlag(SpriteFlag.Invisible, false)
+    transition_text2.setText(text2)
+    transition_text2.setFlag(SpriteFlag.RelativeToCamera, true)
+    transition_text2.setPosition(80, 60)
+    transition_text2.z = 105
+    transition_text3 = textsprite.create("", 0, 1)
+    transition_text3.setFlag(SpriteFlag.Invisible, false)
+    transition_text3.setText(text3)
+    transition_text3.setFlag(SpriteFlag.RelativeToCamera, true)
+    transition_text3.setPosition(80, 70)
+    transition_text3.z = 105
+    timer.after(2500, function () {
         sprites.destroy(black_screen)
+        transition_text.setFlag(SpriteFlag.Invisible, true)
+        transition_text2.setFlag(SpriteFlag.Invisible, true)
+        transition_text3.setFlag(SpriteFlag.Invisible, true)
         screenTransitions.startTransition(screenTransitions.Circle, 1000, false, false)
         timer.after(700, function () {
             movement = 1
@@ -149,6 +168,7 @@ function create_starting_assets () {
         . . . f f f f f f . . . . 
         . . . f f . . f f . . . . 
         `, SpriteKind.Player)
+    campfire = sprites.create(assets.image`myImage1`, SpriteKind.fire)
     sprites.destroy(compton_himself)
     objectives2 = textsprite.create("Objectives", 0, 15)
     objectives2.setOutline(1, 1)
@@ -274,7 +294,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, l
     add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
 })
 function start_game () {
-    transition2()
+    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...")
     toolbar.setFlag(SpriteFlag.Invisible, false)
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
@@ -454,11 +474,11 @@ scene.onOverlapTile(SpriteKind.Player, sprites.castle.tilePath5, function (sprit
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sprite, location) {
     if (objectives_complete) {
-        transition2()
         current_level += -2
         level_position_index += -4
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(going_back_level_positions[level_position_index - 4], going_back_level_positions[level_position_index - 3]))
         tiles.setCurrentTilemap(levels[current_level])
+        transition2("You walk backwards", "and end up back in", "your campsite.")
         tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
         tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
         tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
@@ -570,9 +590,9 @@ scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (spri
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
     if (objectives_complete || current_level <= 3) {
-        transition2()
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
+        transition2("After walking for a", "while, you stumble upon", "another clearing...")
         tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
         tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
         tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
@@ -616,6 +636,9 @@ let levels: tiles.TileMapData[] = []
 let text_index: string[] = []
 let image_index: Image[] = []
 let sticks_brought = 0
+let transition_text3: TextSprite = null
+let transition_text2: TextSprite = null
+let transition_text: TextSprite = null
 let black_screen: Sprite = null
 let toolbar: Inventory.Toolbar = null
 let toolbar_movement_enabled = false
@@ -887,5 +910,10 @@ forever(function () {
     if (shack_materials_collected) {
         sprites.destroyAllSpritesOfKind(SpriteKind.stick)
         sprites.destroyAllSpritesOfKind(SpriteKind.leaf)
+    }
+    if (current_level == 4) {
+        campfire.setFlag(SpriteFlag.Invisible, false)
+    } else {
+        campfire.setFlag(SpriteFlag.Invisible, true)
     }
 })
