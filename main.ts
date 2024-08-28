@@ -12,7 +12,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
     if (shack_materials_collected) {
         if (shelter_built == false) {
             if (controller.B.isPressed()) {
-                transition2("You finish building your", "campsite using the materials", "that you collected.")
+                transition2("You finish building your", "campsite using materials", "that you collected.")
                 tileUtil.coverAllTiles(assets.tile`shelter`, assets.tile`shelter0`)
                 tiles.placeOnTile(campfire, tiles.getTileLocation(25, 18))
                 shelter_built = true
