@@ -414,25 +414,6 @@ f . . . . .
 . . f e f f e e f f f f e e f . 
 . . . f . f f f . . . . f f . . 
 `;
-            case "image12":
-            case "stick2":return img`
-. . . . . . . . . . . f f . . . 
-. . . . f . . . . . f e e f . . 
-. . . f e f . . . . f e f . . . 
-. . . f e e f . . f e e f . . . 
-. . . . f e e f f e e f . . . . 
-. . . . . f e e e e f . . . . . 
-. . . . . . f f e e f . . . . . 
-. . . . . . . f e f . . . . . . 
-. . . . . . . f e f . . . . . . 
-. . . . f . . f e f . . . . . . 
-. . . f e f f f e f . . . . . . 
-. . . f e e e f e f . . . . . . 
-. . . . f f e e e f . . . . . . 
-. . . . . . f f e f . . . . . . 
-. . . . . . . f e f . . . . . . 
-. . . . . . . . f f . . . . . . 
-`;
             case "image14":
             case "stick4":return img`
 . . . . . . . . . . f f f f . . 
@@ -620,6 +601,25 @@ ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+`;
+            case "image12":
+            case "stick2":return img`
+. . . . . . . . . . . f f . . . 
+. . . . f . . . . . f e e f . . 
+. . . f e f . . . . f e f . . . 
+. . . f e e f . . f e e f . . . 
+. . . . f e e f f e e f . . . . 
+. . . . . f e e e e f . . . . . 
+. . . . . . f f e e f . . . . . 
+. . . . . . . f e f . . . . . . 
+. . . . . . . f e f . . . . . . 
+. . . . f . . f e f . . . . . . 
+. . . f e f f f e f . . . . . . 
+. . . f e e e f e f . . . . . . 
+. . . . f f e e e f . . . . . . 
+. . . . . . f f e f . . . . . . 
+. . . . . . . f e f . . . . . . 
+. . . . . . . . f f . . . . . . 
 `;
         }
         return null;

@@ -443,6 +443,7 @@ function start_game () {
     tiles.placeOnTile(compton_himself, tiles.getTileLocation(5, 11))
     myMenu.close()
     timer.after(4000, function () {
+        movement = 0
         compton_himself.sayText("Ugh, what happened?", 2500, false)
         timer.after(2500, function () {
             compton_himself.sayText("I remember being on a hike a moment ago...", 2500, false)
@@ -866,52 +867,6 @@ forever(function () {
     }
 })
 forever(function () {
-    Keybinds.setSimulatorKeymap(
-    Keybinds.PlayerNumber.ONE,
-    Keybinds.CustomKey.W,
-    Keybinds.CustomKey.S,
-    Keybinds.CustomKey.A,
-    Keybinds.CustomKey.D,
-    Keybinds.CustomKey.Q,
-    Keybinds.CustomKey.E
-    )
-    Keybinds.setSimulatorKeymap(
-    Keybinds.PlayerNumber.TWO,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.F
-    )
-})
-forever(function () {
-    if (tutorial_enabled) {
-        textSprite = textsprite.create("WASD to move.", 0, 15)
-        textSprite.top = 40
-        textSprite.left = 10
-        textSprite = textsprite.create(" Menu to on/off hotbar.", 0, 15)
-        textSprite.top = 50
-        textSprite.left = 4
-        textSprite = textsprite.create(" F to move around hotbar,", 0, 15)
-        textSprite.top = 60
-        textSprite.left = 4
-        textSprite = textsprite.create("and interact with tiles.", 0, 15)
-        textSprite.top = 70
-        textSprite.left = 10
-        textSprite = textsprite.create("E to eat selected item.", 0, 15)
-        textSprite.top = 80
-        textSprite.left = 10
-        textSprite = textsprite.create("Q to drop selected item.", 0, 15)
-        textSprite.top = 90
-        textSprite.left = 10
-        if (controller.player2.isPressed(ControllerButton.B)) {
-            start_game()
-            tutorial_enabled = false
-        }
-    }
-})
-forever(function () {
     if (shelter_built == false) {
         objectives_food.setFlag(SpriteFlag.Invisible, true)
         objectives_water.setFlag(SpriteFlag.Invisible, true)
@@ -940,4 +895,50 @@ forever(function () {
     } else {
         campfire.setFlag(SpriteFlag.Invisible, true)
     }
+})
+forever(function () {
+    if (tutorial_enabled) {
+        textSprite = textsprite.create("WASD to move.", 0, 15)
+        textSprite.top = 40
+        textSprite.left = 10
+        textSprite = textsprite.create(" Menu to on/off hotbar.", 0, 15)
+        textSprite.top = 50
+        textSprite.left = 4
+        textSprite = textsprite.create(" F to move around hotbar,", 0, 15)
+        textSprite.top = 60
+        textSprite.left = 4
+        textSprite = textsprite.create("and interact with tiles.", 0, 15)
+        textSprite.top = 70
+        textSprite.left = 10
+        textSprite = textsprite.create("E to eat selected item.", 0, 15)
+        textSprite.top = 80
+        textSprite.left = 10
+        textSprite = textsprite.create("Q to drop selected item.", 0, 15)
+        textSprite.top = 90
+        textSprite.left = 10
+        if (controller.player2.isPressed(ControllerButton.B)) {
+            start_game()
+            tutorial_enabled = false
+        }
+    }
+})
+forever(function () {
+    Keybinds.setSimulatorKeymap(
+    Keybinds.PlayerNumber.ONE,
+    Keybinds.CustomKey.W,
+    Keybinds.CustomKey.S,
+    Keybinds.CustomKey.A,
+    Keybinds.CustomKey.D,
+    Keybinds.CustomKey.Q,
+    Keybinds.CustomKey.E
+    )
+    Keybinds.setSimulatorKeymap(
+    Keybinds.PlayerNumber.TWO,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.UP,
+    Keybinds.CustomKey.F
+    )
 })
