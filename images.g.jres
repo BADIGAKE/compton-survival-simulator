@@ -79,6 +79,16 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "stick2"
     },
+    "image13": {
+        "data": "hwQQABAAAAAAAAAAAAAAAAAAAP///wAAAADw8bG7DwAAAPCxH7v7AAAAH7sfu/sAAAAfux+7+wAAAB+7v7v7AAAAH7u/u/EAAAC/u7+78QAAAPD7u7sPAAAA7////wAAAPDuDwAAAAAA8P4AAAAAAADw/gAAAAAAAO/+AAAAAAAA8A8AAAAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "pot"
+    },
+    "image16": {
+        "data": "hwQQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADw//////8PAC/Md3d3d/cAL8xmZmZm9vDdy3d3d3f38LHLYWZmZvbw0c0XERF39wD///////8PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "lighter"
+    },
     "!frva,gL": {
         "namespace": "aCvKwxKnlU0",
         "id": "!frva,gL",
