@@ -3,65 +3,51 @@ namespace SpriteKind {
     export const fire = SpriteKind.create()
     export const leaf = SpriteKind.create()
     export const stick = SpriteKind.create()
-    export const transition = SpriteKind.create()
-    export const lost_baggage = SpriteKind.create()
 }
-scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
-    add_berry(assets.tile`myTile0`, assets.tile`myTile`, assets.image`myImage4`, "Blackberry")
+
+scene.onOverlapTile(SpriteKind.Player, assets.tile`
+        myTile0
+    `, function on_overlap_tile(sprite: Sprite, location: tiles.Location) {
+    add_berry(assets.tile`
+            myTile0
+        `, assets.tile`
+            myTile
+        `, assets.image`
+            myImage4
+        `, "Blackberry")
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.lost_baggage, function (sprite, otherSprite) {
-    let index2 = 0
-    if (pickup_tutorial == false) {
-        compton_himself.sayText("Press F to pickup Items.", 500, false)
-        if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-            if (otherSprite.image.equals(assets.image`clean_water`)) {
-                toolbar.get_items().push(Inventory.create_item(text_index[index2], otherSprite.image))
-                toolbar.update()
-            }
-            dropped_baggage_gotten += 1
-            update_objectives()
-            sprites.destroy(otherSprite)
-            pickup_tutorial = true
-            if (dropped_baggage_gotten == 3) {
-                compton_himself.sayText("That should be everything here, time to move on.", 1000, false)
-            }
-        }
-    } else {
-        if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-            if (otherSprite.image.equals(assets.image`clean_water`)) {
-                toolbar.get_items().push(Inventory.create_item(text_index[index2], otherSprite.image))
-                toolbar.update()
-            }
-            dropped_baggage_gotten += 1
-            update_objectives()
-            sprites.destroy(otherSprite)
-            if (dropped_baggage_gotten == 3) {
-                compton_himself.sayText("That should be everything here, time to move on.", 1000, false)
-                objectives_complete = true
-            }
-        }
-    }
-})
-scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, location) {
+scene.onOverlapTile(SpriteKind.Player, assets.tile`
+        shelter
+    `, function on_overlap_tile2(sprite2: Sprite, location2: tiles.Location) {
+    
     if (shack_materials_collected) {
         if (shelter_built == false) {
             if (controller.B.isPressed()) {
-                transition2("You finish building your", "campsite using materials", "that you collected.")
-                tileUtil.coverAllTiles(assets.tile`shelter`, assets.tile`shelter0`)
+                tileUtil.coverAllTiles(assets.tile`
+                        shelter
+                    `, assets.tile`
+                        shelter0
+                    `)
+                campfire = sprites.create(assets.image`
+                    myImage1
+                `, SpriteKind.fire)
                 tiles.placeOnTile(campfire, tiles.getTileLocation(25, 18))
                 shelter_built = true
-                update_objectives()
                 sprites.destroy(objectives_sticks)
                 sprites.destroy(objectives_leaves)
+                update_objectives()
             } else {
                 compton_himself.sayText("Press E to build camp with materials.", 200, false)
             }
+            
         }
+        
     } else {
         if (shelter_not_found) {
             movement = 0
             compton_himself.sayText("Tbis looks like a good place for a shelter.", 1000, false)
-            timer.after(1000, function () {
+            timer.after(1000, function on_after() {
+                
                 compton_himself.sayText("I should find some sticks and leaves to start building it.", 1000, false)
                 shelter_not_found = false
                 shelter_built = false
@@ -71,196 +57,177 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
                     objectives_sticks.setFlag(SpriteFlag.Invisible, true)
                     objectives_leaves.setFlag(SpriteFlag.Invisible, true)
                 }
+                
                 movement = 1
             })
         }
+        
         if (shelter_not_found == false) {
             compton_himself.sayText("I should find some sticks and leaves to start building it.", 500, false)
         }
+        
         sprites.destroy(objectives_shelter)
     }
+    
 })
-mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function (player2) {
+mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function on_button_multiplayer_b_pressed(player2: mp.Player) {
     if (toolbar_enabled && toolbar_movement_enabled) {
         toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1)
         if (toolbar.get_number(ToolbarNumberAttribute.SelectedIndex) + 1 > toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
             toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
         }
+        
     }
+    
 })
-function transition2 (text: string, text2: string, text3: string) {
-    movement = 0
-    black_screen = sprites.create(assets.image`black_screen`, SpriteKind.transition)
-    black_screen.setFlag(SpriteFlag.RelativeToCamera, true)
-    black_screen.setPosition(80, 60)
-    black_screen.z = 105
-    transition_text = textsprite.create("", 0, 1)
-    transition_text.setFlag(SpriteFlag.Invisible, false)
-    transition_text.setText(text)
-    transition_text.setFlag(SpriteFlag.RelativeToCamera, true)
-    transition_text.setPosition(80, 50)
-    transition_text.z = 105
-    transition_text2 = textsprite.create("", 0, 1)
-    transition_text2.setFlag(SpriteFlag.Invisible, false)
-    transition_text2.setText(text2)
-    transition_text2.setFlag(SpriteFlag.RelativeToCamera, true)
-    transition_text2.setPosition(80, 60)
-    transition_text2.z = 105
-    transition_text3 = textsprite.create("", 0, 1)
-    transition_text3.setFlag(SpriteFlag.Invisible, false)
-    transition_text3.setText(text3)
-    transition_text3.setFlag(SpriteFlag.RelativeToCamera, true)
-    transition_text3.setPosition(80, 70)
-    transition_text3.z = 105
-    timer.after(2500, function () {
-        sprites.destroy(black_screen)
-        transition_text.setFlag(SpriteFlag.Invisible, true)
-        transition_text2.setFlag(SpriteFlag.Invisible, true)
-        transition_text3.setFlag(SpriteFlag.Invisible, true)
-        screenTransitions.startTransition(screenTransitions.Circle, 1000, false, false)
-        timer.after(700, function () {
-            movement = 1
-        })
-    })
-}
-sprites.onOverlap(SpriteKind.Player, SpriteKind.stick, function (sprite, otherSprite) {
-    if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-        if (shelter_not_found == false) {
-            sticks_brought += 1
-            sprites.destroy(otherSprite)
-            compton_himself.sayText("That's " + sticks_brought + " sticks out of 3", 500, false)
-            update_objectives()
-        }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.stick, function on_on_overlap(sprite3: Sprite, otherSprite: Sprite) {
+    
+    if (shelter_not_found == false) {
+        sticks_brought += 1
+        sprites.destroy(otherSprite)
+        compton_himself.sayText("That's " + ("" + sticks_brought) + " sticks out of 3", 500, false)
+        update_objectives()
     }
+    
 })
-function create_starting_assets () {
-    image_index = [
-    assets.image`no_water`,
-    assets.image`dirty_water`,
-    assets.image`clean_water`,
-    assets.image`myImage2`,
-    assets.image`myImage3`,
-    assets.image`myImage4`
-    ]
-    text_index = [
-    "Empty Bottle",
-    "Dirty Water",
-    "Clean Water",
-    "Kotukutuku",
-    "Kareao",
-    "Blackberry"
-    ]
-    levels = [
-    tileUtil.createSmallMap(tilemap`Level_1`),
-    tileUtil.createSmallMap(tilemap`Level_2`),
-    tileUtil.createSmallMap(tilemap`Level_3`),
-    tileUtil.createSmallMap(tilemap`Level_4`),
-    tileUtil.createSmallMap(tilemap`Level_5`),
-    tileUtil.createSmallMap(tilemap`Level_6`),
-    tileUtil.createSmallMap(tilemap`Level_7`)
-    ]
-    level_starting_positions = [
-    11,
-    11,
-    15,
-    35,
-    5,
-    25,
-    13,
-    26,
-    9,
-    25,
-    9,
-    44
-    ]
-    edible_food = [assets.image`myImage2`, assets.image`myImage3`, assets.image`myImage4`]
+function create_starting_assets() {
+    
+    image_index = [assets.image`
+            no_water
+        `, assets.image`
+            dirty_water
+        `, assets.image`
+            clean_water
+        `, assets.image`
+            myImage2
+        `, assets.image`
+            myImage3
+        `, assets.image`
+            myImage4
+        `]
+    text_index = ["Empty Bottle", "Dirty Water", "Clean Water", "Kotukutuku", "Kareao", "Blackberry"]
+    levels = [tileUtil.createSmallMap(tilemap`
+            Level_1
+        `), tileUtil.createSmallMap(tilemap`
+            Level_2
+        `), tileUtil.createSmallMap(tilemap`
+            Level_3
+        `), tileUtil.createSmallMap(tilemap`
+            Level_4
+        `), tileUtil.createSmallMap(tilemap`
+            Level_5
+        `), tileUtil.createSmallMap(tilemap`
+            Level_6
+        `), tileUtil.createSmallMap(tilemap`
+            Level_7
+        `)]
+    level_starting_positions = [10, 7, 15, 35, 5, 25, 13, 26, 9, 25, 9, 44]
+    edible_food = [assets.image`
+            myImage2
+        `, assets.image`
+            myImage3
+        `, assets.image`
+            myImage4
+        `]
     main_menu = 0
-    movement = 0
+    movement = 1
     start = 1
     toolbar_movement_enabled = true
     compton_himself = sprites.create(img`
-        . . . . f f f f . . . . . 
-        . . f f f f f f f f . . . 
-        . f f f f f f c f f f . . 
-        f f f f f f c c f f f c . 
-        f f f c f f f f f f f c . 
-        c c c f f f e e f f c c . 
-        f f f f f e e f f c c f . 
-        f f f b f e e f b f f f . 
-        . f 4 1 f 4 4 f 1 4 f . . 
-        . f e 4 4 4 4 4 4 e f . . 
-        . f f f e e e e f f f . . 
-        f e f b 7 7 7 7 b f e f . 
-        e 4 f 7 7 7 7 7 7 f 4 e . 
-        e e f 6 6 6 6 6 6 f e e . 
-        . . . f f f f f f . . . . 
-        . . . f f . . f f . . . . 
+            . . . . f f f f . . . . . 
+                    . . f f f f f f f f . . . 
+                    . f f f f f f c f f f . . 
+                    f f f f f f c c f f f c . 
+                    f f f c f f f f f f f c . 
+                    c c c f f f e e f f c c . 
+                    f f f f f e e f f c c f . 
+                    f f f b f e e f b f f f . 
+                    . f 4 1 f 4 4 f 1 4 f . . 
+                    . f e 4 4 4 4 4 4 e f . . 
+                    . f f f e e e e f f f . . 
+                    f e f b 7 7 7 7 b f e f . 
+                    e 4 f 7 7 7 7 7 7 f 4 e . 
+                    e e f 6 6 6 6 6 6 f e e . 
+                    . . . f f f f f f . . . . 
+                    . . . f f . . f f . . . .
         `, SpriteKind.Player)
-    campfire = sprites.create(assets.image`myImage1`, SpriteKind.fire)
     sprites.destroy(compton_himself)
     objectives2 = textsprite.create("Objectives", 0, 15)
     objectives2.setOutline(1, 1)
     objectives2.setFlag(SpriteFlag.Invisible, true)
     objectives_shown = 0
-    current_level = 0
+    current_level = 1
     level_position_index = 0
     objectives_complete = false
     shelter_not_found = true
     shelter_built = false
     shack_materials_collected = false
-    pickup_tutorial = false
     sticks_brought = 3
     leaves_brought = 4
-    dropped_baggage_needed = 3
     update_objectives()
 }
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+
+controller.B.onEvent(ControllerButtonEvent.Pressed, function on_b_pressed() {
+    let index: number;
+    
     if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
-        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
-            if (shelter_built) {
-                compton_himself.sayText("Water Drunk,", 500, false)
-                water_drunk += 1
-                update_objectives()
-                toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Empty Bottle", assets.image`no_water`)
-                toolbar.update()
-            } else {
-                compton_himself.sayText("I should save this for later.", 500, false)
-            }
-        } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
-            compton_himself.sayText("I need to boil this water first.", 500, false)
+        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`
+            clean_water
+        `)) {
+            compton_himself.sayText("hydrated", 500, false)
+            water_drunk += 1
+            update_objectives()
+            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Empty Bottle", assets.image`
+                no_water
+            `)
+            toolbar.update()
+        } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`
+            dirty_water
+        `)) {
+            compton_himself.sayText("I cant drink that", 500, false)
         } else {
-            for (let index = 0; index <= edible_food.length - 1; index++) {
+            index = 0
+            while (index <= edible_food.length - 1) {
                 if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(edible_food[index])) {
-                    compton_himself.sayText("Berry Eaten.", 500, false)
+                    compton_himself.sayText("yummers", 500, false)
                     yummers_eaten += 1
                     update_objectives()
                     toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
                     toolbar.update()
-                    break;
+                    break
                 } else {
                     compton_himself.sayText("I cant eat that", 500, false)
                 }
+                
+                index += 1
             }
         }
+        
     }
+    
 })
-sprites.onCreated(SpriteKind.fire, function (sprite) {
-    animation.runImageAnimation(
-    sprite,
-    assets.animation`myAnim`,
-    200,
-    true
-    )
+sprites.onCreated(SpriteKind.fire, function on_on_created(sprite4: Sprite) {
+    animation.runImageAnimation(sprite4, assets.animation`
+        myAnim
+    `, 200, true)
 })
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+controller.A.onEvent(ControllerButtonEvent.Pressed, function on_a_pressed() {
+    
     if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
-        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`no_water`)) {
-            compton_himself.sayText("I'm going to need this for water.", 200, false)
-        } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
-            compton_himself.sayText("I'm going to need this for water.", 200, false)
-        } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
-            compton_himself.sayText("I'm going to need this for water.", 200, false)
+        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`
+            no_water
+        `)) {
+            compton_himself.sayText("I'm going to need this to drink water.", 200, false)
+        } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`
+            dirty_water
+        `)) {
+            compton_himself.sayText("I'm going to need this to drink water.", 200, false)
+        } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`
+            clean_water
+        `)) {
+            compton_himself.sayText("I'm going to need this to drink water.", 200, false)
         } else {
+            compton_himself.sayText(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_text(ItemTextAttribute.Name), 1000, false)
             dropped_items = sprites.create(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image(), SpriteKind.Food)
             scaling.scaleToPercent(dropped_items, 60, ScaleDirection.Uniformly, ScaleAnchor.Middle)
             dropped_items.setPosition(compton_himself.x, compton_himself.y)
@@ -268,290 +235,309 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
             toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
             toolbar.update()
         }
-    } else {
-        if (main_menu == 1) {
-            if (objectives_shown == 0) {
-                objectives_shown = 1
-                objectives2.setFlag(SpriteFlag.Invisible, false)
-                if (dropped_baggage_gotten != dropped_baggage_needed) {
-                    objectives_baggage.setFlag(SpriteFlag.Invisible, false)
+        
+    } else if (main_menu == 1) {
+        if (objectives_shown == 0) {
+            objectives_shown = 1
+            objectives2.setFlag(SpriteFlag.Invisible, false)
+            if (shelter_built == false) {
+                objectives_food.setFlag(SpriteFlag.Invisible, false)
+                objectives_water.setFlag(SpriteFlag.Invisible, false)
+                if (shelter_not_found == false) {
+                    objectives_sticks.setFlag(SpriteFlag.Invisible, false)
+                    objectives_leaves.setFlag(SpriteFlag.Invisible, false)
                 }
-                if (shelter_built == false) {
-                    objectives_food.setFlag(SpriteFlag.Invisible, false)
-                    objectives_water.setFlag(SpriteFlag.Invisible, false)
-                    if (shelter_not_found == false) {
-                        objectives_sticks.setFlag(SpriteFlag.Invisible, false)
-                        objectives_leaves.setFlag(SpriteFlag.Invisible, false)
-                    }
-                } else {
-                    objectives_food.setFlag(SpriteFlag.Invisible, false)
-                    objectives_water.setFlag(SpriteFlag.Invisible, false)
-                }
+                
             } else {
-                objectives_shown = 0
-                objectives2.setFlag(SpriteFlag.Invisible, true)
-                if (dropped_baggage_gotten != dropped_baggage_needed) {
-                    objectives_baggage.setFlag(SpriteFlag.Invisible, true)
-                }
-                if (shelter_built == false) {
-                    objectives_food.setFlag(SpriteFlag.Invisible, true)
-                    objectives_water.setFlag(SpriteFlag.Invisible, true)
-                    if (shelter_not_found == false) {
-                        objectives_sticks.setFlag(SpriteFlag.Invisible, true)
-                        objectives_leaves.setFlag(SpriteFlag.Invisible, true)
-                    }
-                } else {
-                    objectives_food.setFlag(SpriteFlag.Invisible, true)
-                    objectives_water.setFlag(SpriteFlag.Invisible, true)
-                }
+                objectives_food.setFlag(SpriteFlag.Invisible, false)
+                objectives_water.setFlag(SpriteFlag.Invisible, false)
             }
+            
+        } else {
+            objectives_shown = 0
+            objectives2.setFlag(SpriteFlag.Invisible, true)
+            if (shelter_built == false) {
+                objectives_food.setFlag(SpriteFlag.Invisible, true)
+                objectives_water.setFlag(SpriteFlag.Invisible, true)
+                if (shelter_not_found == false) {
+                    objectives_sticks.setFlag(SpriteFlag.Invisible, true)
+                    objectives_leaves.setFlag(SpriteFlag.Invisible, true)
+                }
+                
+            } else {
+                objectives_food.setFlag(SpriteFlag.Invisible, true)
+                objectives_water.setFlag(SpriteFlag.Invisible, true)
+            }
+            
         }
+        
     }
+    
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.leaf, function (sprite, otherSprite) {
-    if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-        if (shelter_not_found == false) {
-            leaves_brought += 1
-            sprites.destroy(otherSprite)
-            compton_himself.sayText("That's " + leaves_brought + " leaves out of 5", 500, false)
-            update_objectives()
-        }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.leaf, function on_on_overlap2(sprite5: Sprite, otherSprite2: Sprite) {
+    
+    if (shelter_not_found == false) {
+        leaves_brought += 1
+        sprites.destroy(otherSprite2)
+        compton_himself.sayText("That's " + ("" + leaves_brought) + " leaves out of 5", 500, false)
+        update_objectives()
     }
+    
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.fire, function (sprite, otherSprite) {
+sprites.onOverlap(SpriteKind.Player, SpriteKind.fire, function on_on_overlap3(sprite6: Sprite, otherSprite3: Sprite) {
+    
     toolbar_movement_enabled = false
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B) && toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)]) {
-        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
+        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`
+            dirty_water
+        `)) {
             compton_himself.sayText("Water Boiled!", 500, false)
-            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Clean Water", assets.image`clean_water`)
+            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Clean Water", assets.image`
+                clean_water
+            `)
             toolbar.update()
         }
+        
     }
+    
 })
-scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_1`, function (sprite, location) {
-    add_berry(assets.tile`berry_1`, sprites.castle.saplingPine, assets.image`myImage3`, "Kotukutuku")
+scene.onOverlapTile(SpriteKind.Player, assets.tile`
+        berry_1
+    `, function on_overlap_tile3(sprite7: Sprite, location3: tiles.Location) {
+    add_berry(assets.tile`
+            berry_1
+        `, sprites.castle.saplingPine, assets.image`
+            myImage3
+        `, "Kotukutuku")
 })
-scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, location) {
-    add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
+scene.onOverlapTile(SpriteKind.Player, assets.tile`
+        berry_2
+    `, function on_overlap_tile4(sprite8: Sprite, location4: tiles.Location) {
+    add_berry(assets.tile`
+            berry_2
+        `, sprites.castle.saplingOak, assets.image`
+            myImage2
+        `, "Kotukutuku")
 })
-function start_game () {
-    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...")
+function start_game() {
+    
     toolbar.setFlag(SpriteFlag.Invisible, false)
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
     compton_himself = sprites.create(img`
-        . . . . f f f f . . . . . 
-        . . f f f f f f f f . . . 
-        . f f f f f f c f f f . . 
-        f f f f f f c c f f f c . 
-        f f f c f f f f f f f c . 
-        c c c f f f e e f f c c . 
-        f f f f f e e f f c c f . 
-        f f f b f e e f b f f f . 
-        . f 4 1 f 4 4 f 1 4 f . . 
-        . f e 4 4 4 4 4 4 e f . . 
-        . f f f e e e e f f f . . 
-        f e f b 7 7 7 7 b f e f . 
-        e 4 f 7 7 7 7 7 7 f 4 e . 
-        e e f 6 6 6 6 6 6 f e e . 
-        . . . f f f f f f . . . . 
-        . . . f f . . f f . . . . 
+            . . . . f f f f . . . . . 
+                    . . f f f f f f f f . . . 
+                    . f f f f f f c f f f . . 
+                    f f f f f f c c f f f c . 
+                    f f f c f f f f f f f c . 
+                    c c c f f f e e f f c c . 
+                    f f f f f e e f f c c f . 
+                    f f f b f e e f b f f f . 
+                    . f 4 1 f 4 4 f 1 4 f . . 
+                    . f e 4 4 4 4 4 4 e f . . 
+                    . f f f e e e e f f f . . 
+                    f e f b 7 7 7 7 b f e f . 
+                    e 4 f 7 7 7 7 7 7 f 4 e . 
+                    e e f 6 6 6 6 6 6 f e e . 
+                    . . . f f f f f f . . . . 
+                    . . . f f . . f f . . . .
         `, SpriteKind.Player)
     compton_himself.z = 99
     scene.setBackgroundImage(img`
         7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
-        `)
-    tiles.setCurrentTilemap(tilemap`Level_1`)
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+                7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+    `)
+    tiles.setCurrentTilemap(tilemap`
+        Level_1
+    `)
     tiles.placeOnTile(compton_himself, tiles.getTileLocation(5, 11))
-    tileUtil.createSpritesOnTiles(assets.tile`bottle`, assets.image`clean_water`, SpriteKind.lost_baggage)
-    tileUtil.createSpritesOnTiles(assets.tile`pott`, assets.image`pot`, SpriteKind.lost_baggage)
-    tileUtil.createSpritesOnTiles(assets.tile`lighterr`, assets.image`lighter`, SpriteKind.lost_baggage)
     myMenu.close()
-    timer.after(4000, function () {
-        compton_himself.sayText("Ugh, what happened?", 2500, false)
-        timer.after(2500, function () {
-            compton_himself.sayText("I remember being on a hike a moment ago...", 2500, false)
-            timer.after(2500, function () {
-                compton_himself.sayText("Must've lost my footing and knocked myself out somehow.", 3000, false)
-                timer.after(3000, function () {
-                    compton_himself.sayText("And I've lost all my gear!", 2500, false)
-                    timer.after(2500, function () {
-                        compton_himself.sayText("I should look around incase there's any still here.", 2509, false)
-                        timer.after(2500, function () {
-                            compton_himself.sayText("And I'll have to make a shelter before night", 2500, false)
-                            timer.after(2500, function () {
-                                compton_himself.sayText("Best get going then!", 2000, false)
-                                timer.after(1500, function () {
-                                    movement = 1
-                                })
-                            })
-                        })
-                    })
-                })
-            })
-        })
-    })
 }
-function starting_menu () {
-    scene.setBackgroundImage(assets.image`myImage0`)
-    myMenu = miniMenu.createMenu(
-    miniMenu.createMenuItem("New Game"),
-    miniMenu.createMenuItem("Tutorial")
-    )
+
+function starting_menu() {
+    
+    scene.setBackgroundImage(assets.image`
+        myImage0
+    `)
+    myMenu = miniMenu.createMenu(miniMenu.createMenuItem("New Game"), miniMenu.createMenuItem("Tutorial"))
     myMenu.setStyleProperty(miniMenu.StyleKind.DefaultAndSelected, miniMenu.StyleProperty.Background, 6)
     myMenu.setPosition(35, 80)
-    myMenu.onButtonPressed(controller.B, function (selection, selectedIndex) {
+    myMenu.onButtonPressed(controller.B, function on_button_pressed(selection: any, selectedIndex: any) {
+        
         if (selectedIndex == 0) {
             start_game()
         } else {
-            scene.setBackgroundImage(assets.image`myImage`)
+            scene.setBackgroundImage(assets.image`
+                myImage
+            `)
             tutorial_enabled = true
             myMenu.close()
         }
+        
     })
 }
-function create_hotbar () {
-    toolbar = Inventory.create_toolbar([], 3)
+
+function create_hotbar() {
+    
+    toolbar = Inventory.create_toolbar([Inventory.create_item("Empty Bottle", assets.image`
+            no_water
+        `)], 3)
     toolbar.left = 4
     toolbar.bottom = scene.screenHeight() - 4
     toolbar.z = 100
     toolbar.setFlag(SpriteFlag.RelativeToCamera, true)
     toolbar.setFlag(SpriteFlag.Invisible, true)
 }
-scene.onOverlapTile(SpriteKind.Player, sprites.castle.tilePath5, function (sprite, location) {
-    toolbar_movement_enabled = true
-})
-scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sprite, location) {
+
+scene.onOverlapTile(SpriteKind.Player, assets.tile`
+        previous_level
+    `, function on_overlap_tile5(sprite9: Sprite, location5: tiles.Location) {
+    
     if (objectives_complete) {
-        current_level = 3
-        level_position_index = 6
-        tiles.placeOnTile(compton_himself, tiles.getTileLocation(44, 21))
+        current_level += -2
+        level_position_index += -4
+        tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
-        transition2("You walk backwards", "and end up back in", "your campsite.")
-        tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
+        tileUtil.createSpritesOnTiles(assets.tile`
+                campfire
+            `, assets.image`
+                myImage1
+            `, SpriteKind.fire)
+        tileUtil.createSpritesOnTiles(assets.tile`
+                sticks
+            `, assets.image`
+                stick
+            `, SpriteKind.stick)
+        tileUtil.createSpritesOnTiles(assets.tile`
+                leaves
+            `, assets.image`
+                fallen_leaves
+            `, SpriteKind.leaf)
+        current_level += 1
+        level_position_index += 2
         yummers_eaten = 0
         water_drunk = 0
         objectives_complete = false
     }
+    
     if (current_level <= 3) {
         objectives_on = false
     } else {
@@ -560,26 +546,39 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
             objectives_food.setFlag(SpriteFlag.Invisible, false)
             objectives_water.setFlag(SpriteFlag.Invisible, false)
         }
+        
     }
+    
 })
-scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function (sprite, location) {
+scene.onOverlapTile(SpriteKind.Player, assets.tile`
+        myTile2
+    `, function on_overlap_tile6(sprite10: Sprite, location6: tiles.Location) {
+    
     toolbar_movement_enabled = false
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B) && toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)]) {
-        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`no_water`)) {
+        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`
+            no_water
+        `)) {
             compton_himself.sayText("Water Collected!", 500, false)
-            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Dirty Water", assets.image`dirty_water`)
+            toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Dirty Water", assets.image`
+                dirty_water
+            `)
             toolbar.update()
         }
+        
     }
+    
 })
-controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
-    toolbar_enabled = !(toolbar_enabled)
+controller.menu.onEvent(ControllerButtonEvent.Pressed, function on_menu_pressed() {
+    
+    toolbar_enabled = !toolbar_enabled
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     if (toolbar_enabled) {
         toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
     }
+    
 })
-function add_berry (initial_tile: Image, end_tile: Image, berry: Image, berry_name: string) {
+function add_berry(initial_tile: Image, end_tile: Image, berry: Image, berry_name: string) {
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
         toolbar.change_number(ToolbarNumberAttribute.SelectedIndex, -1)
         if (toolbar.get_items().length == toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
@@ -591,92 +590,104 @@ function add_berry (initial_tile: Image, end_tile: Image, berry: Image, berry_na
             pause(100)
             compton_himself.sayText("Berry Obtained!", 500, false)
         }
-    } else {
-        if (toolbar.get_items().length < toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
-            compton_himself.sayText("Press f to harvest.", 500, false)
-        }
+        
+    } else if (toolbar.get_items().length < toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
+        compton_himself.sayText("Press f to harvest.", 500, false)
     }
+    
 }
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
-    for (let index2 = 0; index2 <= image_index.length - 1; index2++) {
-        if (otherSprite.image.equals(image_index[index2])) {
+
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function on_on_overlap4(sprite11: Sprite, otherSprite4: Sprite) {
+    let index2 = 0
+    while (index2 <= image_index.length - 1) {
+        if (otherSprite4.image.equals(image_index[index2])) {
             if (toolbar.get_items().length == toolbar.get_number(ToolbarNumberAttribute.MaxItems)) {
                 if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
                     compton_himself.sayText("My hands are full", 500, false)
                 }
-            } else {
-                if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-                    toolbar.get_items().push(Inventory.create_item(text_index[index2], otherSprite.image))
-                    toolbar.update()
-                    sprites.destroy(otherSprite)
-                }
+                
+            } else if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
+                toolbar.get_items().push(Inventory.create_item(text_index[index2], otherSprite4.image))
+                toolbar.update()
+                sprites.destroy(otherSprite4)
             }
+            
         }
+        
+        index2 += 1
     }
 })
-function update_objectives () {
-    let water_needed = 0
-    let yummers_needed = 0
+function update_objectives() {
+    
     if (objectives_shown == 0) {
-        objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
-        objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/" + water_needed, 0, 15)
+        objectives_food = textsprite.create("Eat Edible Berries: " + ("" + yummers_eaten) + "/" + ("" + yummers_needed), 0, 15)
+        objectives_water = textsprite.create("Drink Clean Water: " + ("" + water_drunk) + "/" + ("" + water_needed), 0, 15)
         objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
+        objectives_sticks = textsprite.create("Obtain " + ("" + sticks_brought) + "/3" + " Sticks", 0, 15)
+        objectives_leaves = textsprite.create("Obtain " + ("" + leaves_brought) + "/5" + " Leaves", 0, 15)
         objectives_shelter.setFlag(SpriteFlag.Invisible, true)
-        objectives_food.setFlag(SpriteFlag.Invisible, true)
-        objectives_water.setFlag(SpriteFlag.Invisible, true)
-        objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/3" + " Sticks", 0, 15)
-        objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
         objectives_sticks.setFlag(SpriteFlag.Invisible, true)
         objectives_leaves.setFlag(SpriteFlag.Invisible, true)
-        objectives_baggage = textsprite.create("Find Lost Items " + dropped_baggage_gotten + "/3", 0, 15)
-        objectives_baggage.setFlag(SpriteFlag.Invisible, true)
+        objectives_food.setFlag(SpriteFlag.Invisible, true)
+        objectives_water.setFlag(SpriteFlag.Invisible, true)
     } else {
         sprites.destroy(objectives_shelter)
+        sprites.destroy(objectives_sticks)
+        sprites.destroy(objectives_leaves)
         sprites.destroy(objectives_food)
         sprites.destroy(objectives_water)
-        objectives_food = textsprite.create("Eat Edible Berries: " + yummers_eaten + "/" + yummers_needed, 0, 15)
-        objectives_water = textsprite.create("Drink Clean Water: " + water_drunk + "/" + water_needed, 0, 15)
+        objectives_food = textsprite.create("Eat Edible Berries: " + ("" + yummers_eaten) + "/" + ("" + yummers_needed), 0, 15)
+        objectives_water = textsprite.create("Drink Clean Water: " + ("" + water_drunk) + "/" + ("" + water_needed), 0, 15)
         objectives_shelter = textsprite.create("Find a Shelter Location", 0, 15)
+        objectives_sticks = textsprite.create("Obtain " + ("" + sticks_brought) + "/3" + " Sticks", 0, 15)
+        objectives_leaves = textsprite.create("Obtain " + ("" + leaves_brought) + "/5" + " Leaves", 0, 15)
+        objectives_shelter.setFlag(SpriteFlag.Invisible, false)
+        objectives_sticks.setFlag(SpriteFlag.Invisible, false)
+        objectives_leaves.setFlag(SpriteFlag.Invisible, false)
         objectives_food.setFlag(SpriteFlag.Invisible, false)
         objectives_water.setFlag(SpriteFlag.Invisible, false)
-        objectives_shelter.setFlag(SpriteFlag.Invisible, false)
-        if (dropped_baggage_gotten != dropped_baggage_needed) {
-            sprites.destroy(objectives_baggage)
-            objectives_baggage = textsprite.create("Find Lost Items " + dropped_baggage_gotten + "/3", 0, 15)
-            objectives_baggage.setFlag(SpriteFlag.Invisible, false)
-        }
-        if (shelter_built == false && shelter_not_found == false) {
-            sprites.destroy(objectives_sticks)
-            sprites.destroy(objectives_leaves)
-            objectives_sticks = textsprite.create("Obtain " + sticks_brought + "/3" + " Sticks", 0, 15)
-            objectives_leaves = textsprite.create("Obtain " + leaves_brought + "/5" + " Leaves", 0, 15)
-            objectives_sticks.setFlag(SpriteFlag.Invisible, false)
-            objectives_leaves.setFlag(SpriteFlag.Invisible, false)
-        }
     }
+    
     objectives_food.setOutline(1, 1)
     objectives_water.setOutline(1, 1)
     objectives_leaves.setOutline(1, 1)
     objectives_sticks.setOutline(1, 1)
     objectives_shelter.setOutline(1, 1)
-    objectives_baggage.setOutline(1, 1)
 }
-scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
+
+scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function on_overlap_tile7(sprite12: Sprite, location7: tiles.Location) {
+    
     toolbar_movement_enabled = true
 })
-scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
-    if (objectives_complete) {
-        current_level += 1
+scene.onOverlapTile(SpriteKind.Player, assets.tile`
+        next_level
+    `, function on_overlap_tile8(sprite13: Sprite, location8: tiles.Location) {
+    
+    if (objectives_complete || current_level <= 3) {
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
-        transition2("After walking for a", "while, you stumble upon", "another clearing...")
-        tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
-        tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
+        tileUtil.createSpritesOnTiles(assets.tile`
+                campfire
+            `, assets.image`
+                myImage1
+            `, SpriteKind.fire)
+        tileUtil.createSpritesOnTiles(assets.tile`
+                sticks
+            `, assets.image`
+                stick
+            `, SpriteKind.stick)
+        tileUtil.createSpritesOnTiles(assets.tile`
+                leaves
+            `, assets.image`
+                fallen_leaves
+            `, SpriteKind.leaf)
+        current_level += 1
         level_position_index += 2
         yummers_eaten = 0
         water_drunk = 0
         objectives_complete = false
     }
+    
     if (current_level <= 3) {
         objectives_on = false
     } else {
@@ -685,61 +696,59 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
             objectives_food.setFlag(SpriteFlag.Invisible, false)
             objectives_water.setFlag(SpriteFlag.Invisible, false)
         }
+        
     }
+    
 })
-let textSprite: TextSprite = null
+let textSprite : TextSprite = null
+let water_needed = 0
+let yummers_needed = 0
 let objectives_on = false
 let tutorial_enabled = false
-let myMenu: miniMenu.MenuSprite = null
-let objectives_water: TextSprite = null
-let objectives_food: TextSprite = null
-let objectives_baggage: TextSprite = null
-let dropped_items: Sprite = null
+let myMenu : miniMenu.MenuSprite = null
+let objectives_water : TextSprite = null
+let objectives_food : TextSprite = null
+let dropped_items : Sprite = null
 let yummers_eaten = 0
 let water_drunk = 0
-let dropped_baggage_needed = 0
 let leaves_brought = 0
+let objectives_complete = false
 let level_position_index = 0
 let current_level = 0
 let start = 0
 let main_menu = 0
-let edible_food: Image[] = []
-let level_starting_positions: number[] = []
-let levels: tiles.TileMapData[] = []
-let image_index: Image[] = []
+let edible_food : Image[] = []
+let level_starting_positions : number[] = []
+let levels : tiles.TileMapData[] = []
+let text_index : string[] = []
+let image_index : Image[] = []
 let sticks_brought = 0
-let transition_text3: TextSprite = null
-let transition_text2: TextSprite = null
-let transition_text: TextSprite = null
-let black_screen: Sprite = null
+let toolbar : Inventory.Toolbar = null
 let toolbar_movement_enabled = false
 let toolbar_enabled = false
-let objectives_shelter: TextSprite = null
-let objectives2: TextSprite = null
+let objectives_shelter : TextSprite = null
+let objectives2 : TextSprite = null
 let objectives_shown = 0
 let movement = 0
 let shelter_not_found = false
-let objectives_leaves: TextSprite = null
-let objectives_sticks: TextSprite = null
-let campfire: Sprite = null
+let compton_himself : Sprite = null
+let objectives_leaves : TextSprite = null
+let objectives_sticks : TextSprite = null
+let campfire : Sprite = null
 let shelter_built = false
 let shack_materials_collected = false
-let objectives_complete = false
-let dropped_baggage_gotten = 0
-let text_index: string[] = []
-let toolbar: Inventory.Toolbar = null
-let compton_himself: Sprite = null
-let pickup_tutorial = false
 starting_menu()
 create_starting_assets()
 create_hotbar()
-forever(function () {
+forever(function on_forever() {
     if (main_menu == 1) {
         if (compton_himself.vx == 0 && compton_himself.vy == 0) {
             animation.stopAnimation(animation.AnimationTypes.All, compton_himself)
         }
+        
         scene.cameraFollowSprite(compton_himself)
     }
+    
     objectives2.left = 4
     objectives_food.left = 4
     objectives_water.left = 4
@@ -764,194 +773,151 @@ forever(function () {
     objectives_leaves.top = 26
     objectives_leaves.z = 100
     objectives_leaves.setFlag(SpriteFlag.RelativeToCamera, true)
-    objectives_baggage.left = 4
-    objectives_baggage.top = 26
-    objectives_baggage.z = 100
-    objectives_baggage.setFlag(SpriteFlag.RelativeToCamera, true)
 })
-forever(function () {
-    if (shelter_built == false) {
-        objectives_food.setFlag(SpriteFlag.Invisible, true)
-        objectives_water.setFlag(SpriteFlag.Invisible, true)
-    }
-    if (leaves_brought >= 5 && sticks_brought >= 3) {
-        shack_materials_collected = true
-    }
-    if (shelter_not_found) {
-        if (objectives_shown) {
-            objectives_shelter.setFlag(SpriteFlag.Invisible, false)
-        } else {
-            objectives_shelter.setFlag(SpriteFlag.Invisible, true)
-        }
-    } else {
-        objectives_shelter.setFlag(SpriteFlag.Invisible, true)
-    }
-    if (shack_materials_collected) {
-        sprites.destroyAllSpritesOfKind(SpriteKind.stick)
-        sprites.destroyAllSpritesOfKind(SpriteKind.leaf)
-    }
-    if (current_level == 4) {
-        campfire.setFlag(SpriteFlag.Invisible, false)
-    } else {
-        campfire.setFlag(SpriteFlag.Invisible, true)
-    }
-    if (dropped_baggage_gotten == 3) {
-        objectives_baggage.setFlag(SpriteFlag.Invisible, true)
-    }
-})
-forever(function () {
+forever(function on_forever2() {
     if (main_menu == 1) {
         if (movement == 1) {
             if (controller.down.isPressed()) {
                 compton_himself.vy += 100
-                animation.runImageAnimation(
-                compton_himself,
-                assets.animation`forward_compy`,
-                100,
-                true
-                )
+                animation.runImageAnimation(compton_himself, assets.animation`
+                        forward_compy
+                    `, 100, true)
                 pause(200)
                 compton_himself.setVelocity(0, 0)
             }
+            
             if (controller.up.isPressed()) {
                 compton_himself.vy += -100
-                animation.runImageAnimation(
-                compton_himself,
-                [img`
-                    . . . . f f f f . . . . . 
-                    . . f f c c c c f f . . . 
-                    . f f c c c c c c f f . . 
-                    f f c c c c c c c c f f . 
-                    f f c c f c c c c c c f . 
-                    f f f f f c c c f c c f . 
-                    f f f f c c c f c c f f . 
-                    f f f f f f f f f f f f . 
-                    f f f f f f f f f f f f . 
-                    . f f f f f f f f f f . . 
-                    . f f f f f f f f f f . . 
-                    f e f f f f f f f f e f . 
-                    e 4 f 7 7 7 7 7 7 c 4 e . 
-                    e e f 6 6 6 6 6 6 f e e . 
-                    . . . f f f f f f . . . . 
-                    . . . f f . . f f . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . 
-                    . . . . . f f f f . . . . 
-                    . . . f f c c c c f f . . 
-                    . f f f c c c c c c f f . 
-                    f f c c c c c c c c c f f 
-                    f c c c c f c c c c c c f 
-                    . f f f f c c c c f c c f 
-                    . f f f f c c f c c c f f 
-                    . f f f f f f f f f f f f 
-                    . f f f f f f f f f f f f 
-                    . . f f f f f f f f f f . 
-                    . . e f f f f f f f f f . 
-                    . . e f f f f f f f f e f 
-                    . . 4 c 7 7 7 7 7 e 4 4 e 
-                    . . e f f f f f f f e e . 
-                    . . . f f f . . . . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . 
-                    . . . . . f f f f . . . . 
-                    . . . f f c c c c f f . . 
-                    . . f f c c c c c c f f . 
-                    . f f f c c c c c c c f f 
-                    f f f c c c c c c c c c f 
-                    f f c c c f c c c c c c f 
-                    . f f f f f c c c f c f f 
-                    . f f f f c c f f c f f f 
-                    . . f f f f f f f f f f f 
-                    . . f f f f f f f f f f . 
-                    . . f f f f f f f f f e . 
-                    . f e f f f f f f f f e . 
-                    . e 4 4 e 7 7 7 7 7 c 4 . 
-                    . . e e f f f f f f f e . 
-                    . . . . . . . . f f f . . 
-                    `],
-                100,
-                true
-                )
+                animation.runImageAnimation(compton_himself, [img`
+                            . . . . f f f f . . . . . 
+                                                . . f f c c c c f f . . . 
+                                                . f f c c c c c c f f . . 
+                                                f f c c c c c c c c f f . 
+                                                f f c c f c c c c c c f . 
+                                                f f f f f c c c f c c f . 
+                                                f f f f c c c f c c f f . 
+                                                f f f f f f f f f f f f . 
+                                                f f f f f f f f f f f f . 
+                                                . f f f f f f f f f f . . 
+                                                . f f f f f f f f f f . . 
+                                                f e f f f f f f f f e f . 
+                                                e 4 f 7 7 7 7 7 7 c 4 e . 
+                                                e e f 6 6 6 6 6 6 f e e . 
+                                                . . . f f f f f f . . . . 
+                                                . . . f f . . f f . . . .
+                        `, img`
+                            . . . . . . . . . . . . . 
+                                                . . . . . f f f f . . . . 
+                                                . . . f f c c c c f f . . 
+                                                . f f f c c c c c c f f . 
+                                                f f c c c c c c c c c f f 
+                                                f c c c c f c c c c c c f 
+                                                . f f f f c c c c f c c f 
+                                                . f f f f c c f c c c f f 
+                                                . f f f f f f f f f f f f 
+                                                . f f f f f f f f f f f f 
+                                                . . f f f f f f f f f f . 
+                                                . . e f f f f f f f f f . 
+                                                . . e f f f f f f f f e f 
+                                                . . 4 c 7 7 7 7 7 e 4 4 e 
+                                                . . e f f f f f f f e e . 
+                                                . . . f f f . . . . . . .
+                        `, img`
+                            . . . . . . . . . . . . . 
+                                                . . . . . f f f f . . . . 
+                                                . . . f f c c c c f f . . 
+                                                . . f f c c c c c c f f . 
+                                                . f f f c c c c c c c f f 
+                                                f f f c c c c c c c c c f 
+                                                f f c c c f c c c c c c f 
+                                                . f f f f f c c c f c f f 
+                                                . f f f f c c f f c f f f 
+                                                . . f f f f f f f f f f f 
+                                                . . f f f f f f f f f f . 
+                                                . . f f f f f f f f f e . 
+                                                . f e f f f f f f f f e . 
+                                                . e 4 4 e 7 7 7 7 7 c 4 . 
+                                                . . e e f f f f f f f e . 
+                                                . . . . . . . . f f f . .
+                        `], 100, true)
                 pause(200)
                 compton_himself.setVelocity(0, 0)
             }
+            
             if (controller.left.isPressed()) {
                 compton_himself.vx += -100
-                animation.runImageAnimation(
-                compton_himself,
-                assets.animation`left_compy`,
-                100,
-                true
-                )
+                animation.runImageAnimation(compton_himself, assets.animation`
+                        left_compy
+                    `, 100, true)
                 pause(200)
                 compton_himself.setVelocity(0, 0)
             }
+            
             if (controller.right.isPressed()) {
                 compton_himself.vx += 100
-                animation.runImageAnimation(
-                compton_himself,
-                [img`
-                    . . . . . . . . . . . . . 
-                    . . . f f f f f f . . . . 
-                    . f f f f f f f f f . . . 
-                    . f f f f f f c f f f . . 
-                    f f f f c f f f c f f f . 
-                    f c f f c c f f f c c f f 
-                    f c c f f f f e f f f f f 
-                    f f f f f f f e e f f f . 
-                    f f e e f b f e e f f f . 
-                    f f e 4 e 1 f 4 4 f f . . 
-                    . f f f e 4 4 4 4 f . . . 
-                    . 4 4 4 e e e e f f . . . 
-                    . e 4 4 e 7 7 7 7 f . . . 
-                    . f e e f 6 6 6 6 f f . . 
-                    . f f f f f f f f f f . . 
-                    . . f f . . . f f f . . . 
-                    `,img`
-                    . . . . . . . . . . . . . 
-                    . . . f f f f f f . . . . 
-                    . f f f f f f f f f . . . 
-                    . f f f f f f c f f f . . 
-                    f f f f c f f f c f f f . 
-                    f c f f c c f f f c c f f 
-                    f c c f f f f e f f f f f 
-                    f f f f f f f e e f f f . 
-                    f f e e f b f e e f f . . 
-                    . f e 4 e 1 f 4 4 f f . . 
-                    . f f f e e 4 4 4 f . . . 
-                    . . f e 4 4 e e f f . . . 
-                    . . f e 4 4 e 7 7 f . . . 
-                    . f f f e e f 6 6 f f . . 
-                    . f f f f f f f f f f . . 
-                    . . f f . . . f f f . . . 
-                    `,img`
-                    . . . f f f f f . . . . . 
-                    . f f f f f f f f f . . . 
-                    . f f f f f f c f f f . . 
-                    f f f f c f f f c f f . . 
-                    f c f f c c f f f c c f f 
-                    f c c f f f f e f f f f f 
-                    f f f f f f f e e f f f . 
-                    f f e e f b f e e f f . . 
-                    . f e 4 e 1 f 4 4 f . . . 
-                    . f f f e 4 4 4 4 f . . . 
-                    . . f e e e e e f f . . . 
-                    . . e 4 4 e 7 7 7 f . . . 
-                    . . e 4 4 e 7 7 7 f . . . 
-                    . . f e e f 6 6 6 f . . . 
-                    . . . f f f f f f . . . . 
-                    . . . . f f f . . . . . . 
-                    `],
-                100,
-                true
-                )
+                animation.runImageAnimation(compton_himself, [img`
+                            . . . . . . . . . . . . . 
+                                                . . . f f f f f f . . . . 
+                                                . f f f f f f f f f . . . 
+                                                . f f f f f f c f f f . . 
+                                                f f f f c f f f c f f f . 
+                                                f c f f c c f f f c c f f 
+                                                f c c f f f f e f f f f f 
+                                                f f f f f f f e e f f f . 
+                                                f f e e f b f e e f f f . 
+                                                f f e 4 e 1 f 4 4 f f . . 
+                                                . f f f e 4 4 4 4 f . . . 
+                                                . 4 4 4 e e e e f f . . . 
+                                                . e 4 4 e 7 7 7 7 f . . . 
+                                                . f e e f 6 6 6 6 f f . . 
+                                                . f f f f f f f f f f . . 
+                                                . . f f . . . f f f . . .
+                        `, img`
+                            . . . . . . . . . . . . . 
+                                                . . . f f f f f f . . . . 
+                                                . f f f f f f f f f . . . 
+                                                . f f f f f f c f f f . . 
+                                                f f f f c f f f c f f f . 
+                                                f c f f c c f f f c c f f 
+                                                f c c f f f f e f f f f f 
+                                                f f f f f f f e e f f f . 
+                                                f f e e f b f e e f f . . 
+                                                . f e 4 e 1 f 4 4 f f . . 
+                                                . f f f e e 4 4 4 f . . . 
+                                                . . f e 4 4 e e f f . . . 
+                                                . . f e 4 4 e 7 7 f . . . 
+                                                . f f f e e f 6 6 f f . . 
+                                                . f f f f f f f f f f . . 
+                                                . . f f . . . f f f . . .
+                        `, img`
+                            . . . f f f f f . . . . . 
+                                                . f f f f f f f f f . . . 
+                                                . f f f f f f c f f f . . 
+                                                f f f f c f f f c f f . . 
+                                                f c f f c c f f f c c f f 
+                                                f c c f f f f e f f f f f 
+                                                f f f f f f f e e f f f . 
+                                                f f e e f b f e e f f . . 
+                                                . f e 4 e 1 f 4 4 f . . . 
+                                                . f f f e 4 4 4 4 f . . . 
+                                                . . f e e e e e f f . . . 
+                                                . . e 4 4 e 7 7 7 f . . . 
+                                                . . e 4 4 e 7 7 7 f . . . 
+                                                . . f e e f 6 6 6 f . . . 
+                                                . . . f f f f f f . . . . 
+                                                . . . . f f f . . . . . .
+                        `], 100, true)
                 pause(200)
                 compton_himself.setVelocity(0, 0)
             }
+            
         }
+        
     }
+    
 })
-forever(function () {
+forever(function on_forever3() {
+    
     if (tutorial_enabled) {
         textSprite = textsprite.create("WASD to move.", 0, 15)
         textSprite.top = 40
@@ -975,25 +941,43 @@ forever(function () {
             start_game()
             tutorial_enabled = false
         }
+        
     }
+    
 })
-forever(function () {
-    Keybinds.setSimulatorKeymap(
-    Keybinds.PlayerNumber.ONE,
-    Keybinds.CustomKey.W,
-    Keybinds.CustomKey.S,
-    Keybinds.CustomKey.A,
-    Keybinds.CustomKey.D,
-    Keybinds.CustomKey.Q,
-    Keybinds.CustomKey.E
-    )
-    Keybinds.setSimulatorKeymap(
-    Keybinds.PlayerNumber.TWO,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.UP,
-    Keybinds.CustomKey.F
-    )
+forever(function on_forever4() {
+    Keybinds.setSimulatorKeymap(Keybinds.PlayerNumber.ONE, Keybinds.CustomKey.W, Keybinds.CustomKey.S, Keybinds.CustomKey.A, Keybinds.CustomKey.D, Keybinds.CustomKey.Q, Keybinds.CustomKey.E)
+    Keybinds.setSimulatorKeymap(Keybinds.PlayerNumber.TWO, Keybinds.CustomKey.UP, Keybinds.CustomKey.UP, Keybinds.CustomKey.UP, Keybinds.CustomKey.UP, Keybinds.CustomKey.UP, Keybinds.CustomKey.F)
+})
+forever(function on_forever5() {
+    
+    if (shelter_built == false) {
+        objectives_food.setFlag(SpriteFlag.Invisible, true)
+        objectives_water.setFlag(SpriteFlag.Invisible, true)
+    }
+    
+    if (yummers_eaten == yummers_needed && water_drunk == water_needed) {
+        objectives_complete = true
+    }
+    
+    if (leaves_brought == 5 && sticks_brought == 3) {
+        shack_materials_collected = true
+    }
+    
+    if (shelter_not_found) {
+        if (objectives_shown) {
+            objectives_shelter.setFlag(SpriteFlag.Invisible, false)
+        } else {
+            objectives_shelter.setFlag(SpriteFlag.Invisible, true)
+        }
+        
+    } else {
+        objectives_shelter.setFlag(SpriteFlag.Invisible, true)
+    }
+    
+    if (shack_materials_collected) {
+        sprites.destroyAllSpritesOfKind(SpriteKind.stick)
+        sprites.destroyAllSpritesOfKind(SpriteKind.leaf)
+    }
+    
 })
