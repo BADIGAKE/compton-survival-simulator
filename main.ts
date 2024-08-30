@@ -65,7 +65,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
             timer.after(1000, function () {
                 compton_himself.sayText("I should find some sticks and leaves to start building it.", 1000, false)
                 shelter_not_found = false
-                shelter_built = false
                 if (objectives_shown == 1) {
                     objectives_shown = 0
                     objectives2.setFlag(SpriteFlag.Invisible, true)
@@ -222,7 +221,7 @@ function create_starting_assets () {
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
         if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
-            if (shelter_built) {
+            if (tutorial_log) {
                 compton_himself.sayText("Water Drunk,", 500, false)
                 water_drunk += 1
                 update_objectives()
@@ -252,7 +251,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 sprites.onCreated(SpriteKind.fire, function (sprite) {
     animation.runImageAnimation(
     sprite,
-    assets.animation`myAnim`,
+    assets.animation`campsfire`,
     200,
     true
     )
@@ -327,7 +326,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.fire, function (sprite, otherSpr
     toolbar_movement_enabled = false
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B) && toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)]) {
         if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
-            compton_himself.sayText("Water Boiled!", 500, false)
+            compton_himself.sayText("You use your pot to boil the water.", 1000, false)
             toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Clean Water", assets.image`clean_water`)
             toolbar.update()
         }
@@ -340,7 +339,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, l
     add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
 })
 function start_game () {
-    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", true)
+    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", false)
     toolbar.setFlag(SpriteFlag.Invisible, false)
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
@@ -556,8 +555,9 @@ function level_objectives () {
         objectives_complete = false
         update_objectives()
     } else if (current_level == 3) {
+        water_drunk = 0
+        water_needed = 0
         yummers_eaten = 0
-        water_needed = 1
         yummers_needed = 1
         objectives_complete = false
         update_objectives()
@@ -606,21 +606,25 @@ controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`log discovery`, function (sprite, location) {
-    if (tutorial_log == false) {
-        movement = 0
-        compton_himself.sayText("Good thing this log is here,", 1500, false)
+    tutorial_log = true
+    tileUtil.replaceAllTiles(assets.tile`log discovery`, assets.tile`default_block`)
+    movement = 0
+    compton_himself.sayText("Good thing this log is here,", 1500, false)
+    timer.after(1500, function () {
+        compton_himself.sayText("This river is flowing too fast for me to cross it normally.", 1500, false)
         timer.after(1500, function () {
-            compton_himself.sayText("This river is flowing too fast for me to cross it normally.", 1500, false)
+            compton_himself.sayText("I can also collect water on the edge of this river.", 1500, false)
             timer.after(1500, function () {
-                compton_himself.sayText("I can also collect water on the edge of this log.", 1500, false)
+                compton_himself.sayText("No need to save this water now I guess.", 1500, false)
                 timer.after(1500, function () {
-                    compton_himself.sayText("(Press F while selecting an empty bottle to collect water)", 1500, false)
+                    compton_himself.sayText("(Press F while selecting an empty bottle next to a river to collect water)", 1500, false)
                     movement = 1
-                    tutorial_log = true
+                    water_needed = 1
+                    update_objectives()
                 })
             })
         })
-    }
+    })
 })
 function add_berry (initial_tile: Image, end_tile: Image, berry: Image, berry_name: string) {
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
@@ -800,14 +804,18 @@ forever(function () {
     if (yummers_needed == 0) {
         objectives_food.setFlag(SpriteFlag.Invisible, true)
     } else if (yummers_needed == yummers_eaten) {
-        objectives_complete = true
         objectives_food.setFlag(SpriteFlag.Invisible, true)
+        if (yummers_needed == yummers_eaten && water_needed == water_drunk) {
+            objectives_complete = true
+        }
     }
     if (water_needed == 0) {
         objectives_water.setFlag(SpriteFlag.Invisible, true)
     } else if (water_needed == water_drunk) {
-        objectives_complete = true
         objectives_water.setFlag(SpriteFlag.Invisible, true)
+        if (yummers_needed == yummers_eaten && water_needed == water_drunk) {
+            objectives_complete = true
+        }
     }
     if (shelter_not_found) {
         if (objectives_shown) {
@@ -822,13 +830,17 @@ forever(function () {
         sprites.destroyAllSpritesOfKind(SpriteKind.stick, effects.disintegrate, 500)
         sprites.destroyAllSpritesOfKind(SpriteKind.leaf, effects.disintegrate, 500)
     }
-    if (current_level == 4) {
+    if (current_level == 3) {
         campfire.setFlag(SpriteFlag.Invisible, false)
     } else {
         campfire.setFlag(SpriteFlag.Invisible, true)
     }
     if (dropped_baggage_gotten == 3) {
         objectives_baggage.setFlag(SpriteFlag.Invisible, true)
+    }
+    if (current_level == 3 && shelter_built == false) {
+        objectives_food.setFlag(SpriteFlag.Invisible, true)
+        objectives_water.setFlag(SpriteFlag.Invisible, true)
     }
 })
 forever(function () {
@@ -842,8 +854,16 @@ forever(function () {
     objectives_food.left = 4
     objectives_water.left = 4
     objectives2.top = 4
-    objectives_food.top = 26
-    objectives_water.top = 15
+    if (current_level == 3) {
+        objectives_food.top = 10
+    } else {
+        objectives_food.top = 26
+    }
+    if (current_level == 2) {
+        objectives_water.top = 37
+    } else {
+        objectives_water.top = 15
+    }
     objectives2.z = 100
     objectives_food.z = 100
     objectives_water.z = 100
@@ -885,58 +905,7 @@ forever(function () {
                 compton_himself.vy += -100
                 animation.runImageAnimation(
                 compton_himself,
-                [img`
-                    . . . . f f f f . . . . . 
-                    . . f f c c c c f f . . . 
-                    . f f c c c c c c f f . . 
-                    f f c c c c c c c c f f . 
-                    f f c c f c c c c c c f . 
-                    f f f f f c c c f c c f . 
-                    f f f f c c c f c c f f . 
-                    f f f f f f f f f f f f . 
-                    f f f f f f f f f f f f . 
-                    . f f f f f f f f f f . . 
-                    . f f f f f f f f f f . . 
-                    f e f f f f f f f f e f . 
-                    e 4 f 7 7 7 7 7 7 c 4 e . 
-                    e e f 6 6 6 6 6 6 f e e . 
-                    . . . f f f f f f . . . . 
-                    . . . f f . . f f . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . 
-                    . . . . . f f f f . . . . 
-                    . . . f f c c c c f f . . 
-                    . f f f c c c c c c f f . 
-                    f f c c c c c c c c c f f 
-                    f c c c c f c c c c c c f 
-                    . f f f f c c c c f c c f 
-                    . f f f f c c f c c c f f 
-                    . f f f f f f f f f f f f 
-                    . f f f f f f f f f f f f 
-                    . . f f f f f f f f f f . 
-                    . . e f f f f f f f f f . 
-                    . . e f f f f f f f f e f 
-                    . . 4 c 7 7 7 7 7 e 4 4 e 
-                    . . e f f f f f f f e e . 
-                    . . . f f f . . . . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . 
-                    . . . . . f f f f . . . . 
-                    . . . f f c c c c f f . . 
-                    . . f f c c c c c c f f . 
-                    . f f f c c c c c c c f f 
-                    f f f c c c c c c c c c f 
-                    f f c c c f c c c c c c f 
-                    . f f f f f c c c f c f f 
-                    . f f f f c c f f c f f f 
-                    . . f f f f f f f f f f f 
-                    . . f f f f f f f f f f . 
-                    . . f f f f f f f f f e . 
-                    . f e f f f f f f f f e . 
-                    . e 4 4 e 7 7 7 7 7 c 4 . 
-                    . . e e f f f f f f f e . 
-                    . . . . . . . . f f f . . 
-                    `],
+                assets.animation`backwards_compy`,
                 100,
                 true
                 )
@@ -958,58 +927,7 @@ forever(function () {
                 compton_himself.vx += 100
                 animation.runImageAnimation(
                 compton_himself,
-                [img`
-                    . . . . . . . . . . . . . 
-                    . . . f f f f f f . . . . 
-                    . f f f f f f f f f . . . 
-                    . f f f f f f c f f f . . 
-                    f f f f c f f f c f f f . 
-                    f c f f c c f f f c c f f 
-                    f c c f f f f e f f f f f 
-                    f f f f f f f e e f f f . 
-                    f f e e f b f e e f f f . 
-                    f f e 4 e 1 f 4 4 f f . . 
-                    . f f f e 4 4 4 4 f . . . 
-                    . 4 4 4 e e e e f f . . . 
-                    . e 4 4 e 7 7 7 7 f . . . 
-                    . f e e f 6 6 6 6 f f . . 
-                    . f f f f f f f f f f . . 
-                    . . f f . . . f f f . . . 
-                    `,img`
-                    . . . . . . . . . . . . . 
-                    . . . f f f f f f . . . . 
-                    . f f f f f f f f f . . . 
-                    . f f f f f f c f f f . . 
-                    f f f f c f f f c f f f . 
-                    f c f f c c f f f c c f f 
-                    f c c f f f f e f f f f f 
-                    f f f f f f f e e f f f . 
-                    f f e e f b f e e f f . . 
-                    . f e 4 e 1 f 4 4 f f . . 
-                    . f f f e e 4 4 4 f . . . 
-                    . . f e 4 4 e e f f . . . 
-                    . . f e 4 4 e 7 7 f . . . 
-                    . f f f e e f 6 6 f f . . 
-                    . f f f f f f f f f f . . 
-                    . . f f . . . f f f . . . 
-                    `,img`
-                    . . . f f f f f . . . . . 
-                    . f f f f f f f f f . . . 
-                    . f f f f f f c f f f . . 
-                    f f f f c f f f c f f . . 
-                    f c f f c c f f f c c f f 
-                    f c c f f f f e f f f f f 
-                    f f f f f f f e e f f f . 
-                    f f e e f b f e e f f . . 
-                    . f e 4 e 1 f 4 4 f . . . 
-                    . f f f e 4 4 4 4 f . . . 
-                    . . f e e e e e f f . . . 
-                    . . e 4 4 e 7 7 7 f . . . 
-                    . . e 4 4 e 7 7 7 f . . . 
-                    . . f e e f 6 6 6 f . . . 
-                    . . . f f f f f f . . . . 
-                    . . . . f f f . . . . . . 
-                    `],
+                assets.animation`right_compy`,
                 100,
                 true
                 )
