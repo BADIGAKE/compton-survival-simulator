@@ -339,7 +339,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, l
     add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
 })
 function start_game () {
-    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", true)
+    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", false)
     toolbar.setFlag(SpriteFlag.Invisible, false)
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
