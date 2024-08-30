@@ -169,8 +169,8 @@ function create_starting_assets () {
     35,
     5,
     25,
-    13,
-    26,
+    9,
+    20,
     9,
     25,
     9,
@@ -213,6 +213,7 @@ function create_starting_assets () {
     shack_materials_collected = false
     pickup_tutorial = false
     tutorial_berry = false
+    tutorial_log = false
     sticks_brought = 3
     leaves_brought = 4
     dropped_baggage_needed = 3
@@ -339,7 +340,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, l
     add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
 })
 function start_game () {
-    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", false)
+    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", true)
     toolbar.setFlag(SpriteFlag.Invisible, false)
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
@@ -549,6 +550,17 @@ function level_objectives () {
         yummers_needed = 1
         objectives_complete = false
         update_objectives()
+    } else if (current_level == 2) {
+        yummers_eaten = 0
+        yummers_needed = 1
+        objectives_complete = false
+        update_objectives()
+    } else if (current_level == 3) {
+        yummers_eaten = 0
+        water_needed = 1
+        yummers_needed = 1
+        objectives_complete = false
+        update_objectives()
     }
 }
 scene.onOverlapTile(SpriteKind.Player, sprites.castle.tilePath5, function (sprite, location) {
@@ -591,6 +603,23 @@ controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     if (toolbar_enabled) {
         toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, 0)
+    }
+})
+scene.onOverlapTile(SpriteKind.Player, assets.tile`log discovery`, function (sprite, location) {
+    if (tutorial_log == false) {
+        movement = 0
+        compton_himself.sayText("Good thing this log is here,", 1500, false)
+        timer.after(1500, function () {
+            compton_himself.sayText("This river is flowing too fast for me to cross it normally.", 1500, false)
+            timer.after(1500, function () {
+                compton_himself.sayText("I can also collect water on the edge of this log.", 1500, false)
+                timer.after(1500, function () {
+                    compton_himself.sayText("(Press F while selecting an empty bottle to collect water)", 1500, false)
+                    movement = 1
+                    tutorial_log = true
+                })
+            })
+        })
     }
 })
 function add_berry (initial_tile: Image, end_tile: Image, berry: Image, berry_name: string) {
@@ -715,8 +744,8 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
     }
 })
 let textSprite: TextSprite = null
-let water_needed = 0
 let objectives_on = false
+let water_needed = 0
 let yummers_needed = 0
 let tutorial_enabled = false
 let myMenu: miniMenu.MenuSprite = null
@@ -728,6 +757,7 @@ let yummers_eaten = 0
 let water_drunk = 0
 let dropped_baggage_needed = 0
 let leaves_brought = 0
+let tutorial_log = false
 let tutorial_berry = false
 let level_position_index = 0
 let current_level = 0
