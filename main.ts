@@ -46,7 +46,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
     if (shack_materials_collected) {
         if (shelter_built == false) {
             if (controller.B.isPressed()) {
-                transition2("You finish building your", "campsite using materials", "that you collected.")
+                transition2("You finish building your", "campsite using materials", "that you collected.", true)
                 tileUtil.coverAllTiles(assets.tile`shelter`, assets.tile`shelter0`)
                 tiles.placeOnTile(campfire, tiles.getTileLocation(25, 18))
                 shelter_built = true
@@ -88,7 +88,7 @@ mp.onButtonEvent(mp.MultiplayerButton.B, ControllerButtonEvent.Pressed, function
         }
     }
 })
-function transition2 (text: string, text2: string, text3: string) {
+function transition2 (text: string, text2: string, text3: string, movement_enabled: boolean) {
     movement = 0
     black_screen = sprites.create(assets.image`black_screen`, SpriteKind.transition)
     black_screen.setFlag(SpriteFlag.RelativeToCamera, true)
@@ -335,7 +335,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, l
     add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
 })
 function start_game () {
-    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...")
+    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", true)
     toolbar.setFlag(SpriteFlag.Invisible, false)
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
@@ -546,7 +546,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         level_position_index = 6
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(44, 21))
         tiles.setCurrentTilemap(levels[current_level])
-        transition2("You walk backwards", "and end up back in", "your campsite.")
+        transition2("You walk backwards", "and end up back in", "your campsite.", true)
         tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
         yummers_eaten = 0
         water_drunk = 0
@@ -669,7 +669,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
         current_level += 1
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
-        transition2("After walking for a", "while, you stumble upon", "another clearing...")
+        transition2("After walking for a", "while, you stumble upon", "another clearing...", true)
         tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
         tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
         level_position_index += 2
