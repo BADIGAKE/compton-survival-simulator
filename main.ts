@@ -558,7 +558,7 @@ function level_objectives () {
         water_drunk = 0
         water_needed = 0
         yummers_eaten = 0
-        yummers_needed = 1
+        yummers_needed = 2
         objectives_complete = false
         update_objectives()
     }
@@ -855,7 +855,7 @@ forever(function () {
     objectives_water.left = 4
     objectives2.top = 4
     if (current_level == 3) {
-        objectives_food.top = 10
+        objectives_food.top = 15
     } else {
         objectives_food.top = 26
     }
