@@ -267,6 +267,18 @@
         "tilemapTile": true,
         "displayName": "default_block"
     },
+    "tile44": {
+        "data": "hwQQABAAAAAAAAAAAADw/wAAAAAA8H93AAAAAPBv9ncAAAAAf29m/wAAAPB392ZvAAAA/393/2YAAPBm//d3/wAAb/Zmf/d/APD///Z3f3cA8Hd3/39//wBvf/dm9v/vAG/2b2b/7v7wZmb2/+7///Bv9u/u////f/f/7v////9/d/f+/////w==",
+        "mimeType": "image/x-mkcd-f4",
+        "tilemapTile": true,
+        "displayName": "camp_left"
+    },
+    "tile45": {
+        "data": "hwQQABAAAAD/f/f+/////2/2/+7/////8Pb37+7////w9nf3/+7//wB/9393/+7+AP9v9vdm/+8A8Pdmb2Z/9wDwd//39nf3AAB/f3f/f28AAPB393f3ZgAAAH/3//f/AAAA8G/2f3cAAAAAb2b2fwAAAADwb2/2AAAAAADwb2YAAAAAAADw/w==",
+        "mimeType": "image/x-mkcd-f4",
+        "tilemapTile": true,
+        "displayName": "camp_right"
+    },
     "level2": {
         "id": "level2",
         "mimeType": "application/mkcd-tilemap",
