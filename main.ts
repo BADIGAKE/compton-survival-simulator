@@ -65,9 +65,9 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
     } else {
         if (shelter_not_found) {
             movement = 0
-            compton_himself.sayText("Tbis looks like a good place for a shelter.", 1000, false)
-            timer.after(1000, function () {
-                compton_himself.sayText("I should find some sticks and leaves to start building it.", 1000, false)
+            compton_himself.sayText("Tbis looks like a good place for a shelter.", 2000, false)
+            timer.after(2000, function () {
+                compton_himself.sayText("I should find some sticks and leaves to start building it.", 2000, false)
                 shelter_not_found = false
                 if (objectives_shown == 1) {
                     objectives_shown = 0
@@ -130,13 +130,11 @@ function transition2 (text: string, text2: string, text3: string, movement_enabl
     })
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.stick, function (sprite, otherSprite) {
-    if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-        if (shelter_not_found == false) {
-            sticks_brought += 1
-            sprites.destroy(otherSprite)
-            compton_himself.sayText("That's " + sticks_brought + " sticks out of 3", 500, false)
-            update_objectives()
-        }
+    if (shelter_not_found == false) {
+        sticks_brought += 1
+        sprites.destroy(otherSprite)
+        compton_himself.sayText("That's " + sticks_brought + " sticks out of 3", 500, false)
+        update_objectives()
     }
 })
 function create_starting_assets () {
@@ -319,6 +317,8 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                 objectives2.setFlag(SpriteFlag.Invisible, true)
                 objectives_get_water.setFlag(SpriteFlag.Invisible, true)
                 objectives_sleep.setFlag(SpriteFlag.Invisible, true)
+                objectives_explore.setFlag(SpriteFlag.Invisible, true)
+                objectives_leave.setFlag(SpriteFlag.Invisible, true)
                 if (dropped_baggage_gotten != dropped_baggage_needed) {
                     objectives_baggage.setFlag(SpriteFlag.Invisible, true)
                 }
@@ -338,13 +338,11 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.leaf, function (sprite, otherSprite) {
-    if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
-        if (shelter_not_found == false) {
-            leaves_brought += 1
-            sprites.destroy(otherSprite)
-            compton_himself.sayText("That's " + leaves_brought + " leaves out of 5", 500, false)
-            update_objectives()
-        }
+    if (shelter_not_found == false) {
+        leaves_brought += 1
+        sprites.destroy(otherSprite)
+        compton_himself.sayText("That's " + leaves_brought + " leaves out of 5", 500, false)
+        update_objectives()
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.fire, function (sprite, otherSprite) {
@@ -367,7 +365,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, l
     add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
 })
 function start_game () {
-    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", false)
+    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", true)
     toolbar.setFlag(SpriteFlag.Invisible, false)
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
@@ -497,6 +495,8 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         objectives_complete = false
         travelling_back_needed = false
         sleeping_needed = true
+        sprites.destroy(objectives_leave)
+        update_objectives()
     }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function (sprite, location) {
@@ -528,26 +528,26 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
             update_objectives()
             if (nights_slept == 1) {
                 movement = 0
-                timer.after(2000, function () {
-                    compton_himself.sayText("Today I should go exploring to find more berries.", 2000, false)
-                    timer.after(2000, function () {
-                        compton_himself.sayText("But before that, I should boil some water at the fire.", 2000, false)
-                        timer.after(2000, function () {
-                            compton_himself.sayText("Best be off then!", 2000, false)
+                timer.after(4000, function () {
+                    compton_himself.sayText("Today I should go exploring to find more berries.", 3000, false)
+                    timer.after(3000, function () {
+                        compton_himself.sayText("But before that, I should boil some water at the fire.", 3000, false)
+                        timer.after(3000, function () {
+                            compton_himself.sayText("Best be off then!", 3000, false)
                             movement = 1
                         })
                     })
                 })
             } else if (nights_slept == 2) {
                 movement = 0
-                timer.after(2000, function () {
-                    compton_himself.sayText("Today I should go find a river for more water,", 2000, false)
-                    timer.after(2000, function () {
-                        compton_himself.sayText("Since I drank my supply yesterday.", 2000, false)
-                        timer.after(2000, function () {
-                            compton_himself.sayText("I should also find some berries along with that.", 2000, false)
-                            timer.after(2000, function () {
-                                compton_himself.sayText("Best be off then!", 2000, false)
+                timer.after(3000, function () {
+                    compton_himself.sayText("Today I should go find a river for more water,", 3000, false)
+                    timer.after(3000, function () {
+                        compton_himself.sayText("Since I drank my supply yesterday.", 3000, false)
+                        timer.after(3000, function () {
+                            compton_himself.sayText("I should also find some berries along with that.", 3000, false)
+                            timer.after(3000, function () {
+                                compton_himself.sayText("Best be off then!", 3000, false)
                                 movement = 1
                             })
                         })
@@ -555,12 +555,12 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
                 })
             } else if (nights_slept == 3) {
                 movement = 0
-                timer.after(2000, function () {
-                    compton_himself.sayText("Today I should go exploring to find more berries.", 2000, false)
-                    timer.after(2000, function () {
-                        compton_himself.sayText("But before that, I should boil some water at the fire.", 2000, false)
-                        timer.after(2000, function () {
-                            compton_himself.sayText("Best be off then!", 2000, false)
+                timer.after(3000, function () {
+                    compton_himself.sayText("Today I should go exploring to find more berries.", 3000, false)
+                    timer.after(3000, function () {
+                        compton_himself.sayText("But before that, I should boil some water at the fire.", 3000, false)
+                        timer.after(3000, function () {
+                            compton_himself.sayText("Best be off then!", 3000, false)
                             movement = 1
                         })
                     })
@@ -580,15 +580,15 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`log discovery`, function (spr
     tutorial_log = true
     tileUtil.replaceAllTiles(assets.tile`log discovery`, assets.tile`default_block`)
     movement = 0
-    compton_himself.sayText("Good thing this log is here,", 1500, false)
-    timer.after(1500, function () {
-        compton_himself.sayText("This river is flowing too fast for me to cross it normally.", 1500, false)
-        timer.after(1500, function () {
-            compton_himself.sayText("I can also collect water on the edge of this river.", 1500, false)
-            timer.after(1500, function () {
-                compton_himself.sayText("No need to save this water now I guess.", 1500, false)
-                timer.after(1500, function () {
-                    compton_himself.sayText("(Press F while selecting an empty bottle next to a river to collect water)", 1500, false)
+    compton_himself.sayText("Good thing this log is here,", 3000, false)
+    timer.after(3000, function () {
+        compton_himself.sayText("This river is flowing too fast for me to cross it normally.", 3000, false)
+        timer.after(3000, function () {
+            compton_himself.sayText("I can also collect water on the edge of this river.", 3000, false)
+            timer.after(3000, function () {
+                compton_himself.sayText("No need to save this water now I guess.", 3000, false)
+                timer.after(3000, function () {
+                    compton_himself.sayText("(Press F while selecting an empty bottle next to a river to collect water)", 3000, false)
                     movement = 1
                     water_needed = 1
                     update_objectives()
@@ -704,12 +704,12 @@ function update_objectives () {
         if (travelling_away_needed) {
             sprites.destroy(objectives_explore)
             objectives_explore = textsprite.create("Leave to explore", 0, 15)
-            objectives_explore.setFlag(SpriteFlag.Invisible, true)
+            objectives_explore.setFlag(SpriteFlag.Invisible, false)
         }
         if (travelling_back_needed) {
             sprites.destroy(objectives_leave)
-            objectives_leave = textsprite.create("Leave to explore", 0, 15)
-            objectives_leave.setFlag(SpriteFlag.Invisible, true)
+            objectives_leave = textsprite.create("Go back to camp", 0, 15)
+            objectives_leave.setFlag(SpriteFlag.Invisible, false)
         }
     }
     objectives_food.setOutline(1, 1)
@@ -741,6 +741,8 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
         objectives_complete = false
         travelling_away_needed = false
         water_boiled = false
+        sprites.destroy(objectives_explore)
+        update_objectives()
     } else if (objectives_complete || well_rested) {
         current_level += 1
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
@@ -754,6 +756,8 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
         level_objectives()
         objectives_complete = false
         travelling_away_needed = false
+        sprites.destroy(objectives_explore)
+        update_objectives()
     }
 })
 let textSprite: TextSprite = null
@@ -866,6 +870,9 @@ forever(function () {
         objectives_food.setFlag(SpriteFlag.Invisible, true)
         objectives_water.setFlag(SpriteFlag.Invisible, true)
     }
+    if (current_level > 3 && objectives_complete) {
+        travelling_back_needed = true
+    }
 })
 forever(function () {
     if (main_menu == 1) {
@@ -923,7 +930,7 @@ forever(function () {
     objectives_leave.z = 100
     objectives_leave.setFlag(SpriteFlag.RelativeToCamera, true)
     objectives_explore.left = 4
-    objectives_explore.top = 37
+    objectives_explore.top = 15
     objectives_explore.z = 100
     objectives_explore.setFlag(SpriteFlag.RelativeToCamera, true)
 })
@@ -931,7 +938,7 @@ forever(function () {
     if (main_menu == 1) {
         if (movement == 1) {
             if (controller.down.isPressed()) {
-                compton_himself.vy += 100
+                compton_himself.vy += 80
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`forward_compy`,
@@ -942,7 +949,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.up.isPressed()) {
-                compton_himself.vy += -100
+                compton_himself.vy += -80
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`backwards_compy`,
@@ -953,7 +960,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.left.isPressed()) {
-                compton_himself.vx += -100
+                compton_himself.vx += -80
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`left_compy`,
@@ -964,7 +971,7 @@ forever(function () {
                 compton_himself.setVelocity(0, 0)
             }
             if (controller.right.isPressed()) {
-                compton_himself.vx += 100
+                compton_himself.vx += 80
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`right_compy`,

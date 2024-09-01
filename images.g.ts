@@ -41,25 +41,6 @@ f c c c c c c f b b b c c c c f
 . . . . . . . f f . . . . . . . 
 . . . . . . . . . . . . . . . . 
 `;
-            case "image6":
-            case "myImage4":return img`
-. . . . . . . . f f . . . . . . 
-. . . . . . . f 7 7 f . . . . . 
-. . . . . f f f 7 f . . . . . . 
-. . . . f 7 7 7 7 7 f f . . . . 
-. . . f 7 7 7 7 7 7 7 7 f . . . 
-. . f 7 7 f f f f f 7 7 7 f . . 
-. f 7 7 f a 1 f a 1 f 7 7 7 f . 
-. f 7 f 1 f a f a a f f f 7 7 f 
-. . f a a f f 1 f f a 1 f f f . 
-. . . f f 1 f a a f a f 1 f . . 
-. . . f a a f f f 1 f a a f . . 
-. . . . f f 1 f a a f f f . . . 
-. . . . f a a f f f 1 f . . . . 
-. . . . . f f a 1 f a f . . . . 
-. . . . . . f a a f f . . . . . 
-. . . . . . . f f . . . . . . . 
-`;
             case "image9":
             case "no_water":return img`
 . . . . f f f f f f f f . . . . 
@@ -800,6 +781,25 @@ e e f 6 6 6 6 6 6 f e e .
 f7f66f7f77feffffffffef777ff7f66f
 f77ff6ff7ffeffffffffef77f6f7f66f
 f77f66f77feffffffffffeff66f77f6f
+`;
+            case "image6":
+            case "myImage4":return img`
+. . . . . . . . f f . . . . . . 
+. . . . . . . f 7 7 f . . . . . 
+. . . . . f f f 7 f . . . . . . 
+. . . . f 7 7 7 7 7 f f . . . . 
+. . . f 7 7 7 7 7 7 7 7 f . . . 
+. . f 7 7 f f f f f 7 7 7 f . . 
+. f 7 7 f a 1 f a 1 f 7 7 7 f . 
+. f 7 f 1 f a f a a f f f 7 7 f 
+. . f a a f f 1 f f a 1 f f f . 
+. . . f f 1 f a a f a f 1 f . . 
+. . . f a a f f f 1 f f a f . . 
+. . . . f f 1 f a a f f f . . . 
+. . . . f a a f f f 1 f . . . . 
+. . . . . f f a 1 f a f . . . . 
+. . . . . . f a a f f . . . . . 
+. . . . . . . f f . . . . . . . 
 `;
         }
         return null;
