@@ -49,6 +49,8 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter`, function (sprite, l
             if (controller.B.isPressed()) {
                 transition2("You finish building your", "campsite using materials", "that you collected.", true)
                 tileUtil.coverAllTiles(assets.tile`shelter`, assets.tile`shelter0`)
+                tileUtil.coverTile(tiles.getTileLocation(24, 16), assets.tile`camp_left`)
+                tileUtil.coverTile(tiles.getTileLocation(25, 16), assets.tile`camp_right`)
                 tiles.setTileAt(tiles.getTileLocation(24, 16), assets.tile`camp_left`)
                 tiles.setTileAt(tiles.getTileLocation(25, 16), assets.tile`camp_right`)
                 tiles.placeOnTile(campfire, tiles.getTileLocation(25, 18))
@@ -200,10 +202,14 @@ function create_starting_assets () {
     tutorial_log = false
     sleeping_needed = false
     water_collection_needed = false
+    travelling_back_needed = false
+    travelling_away_needed = false
+    sleeping_allowed = false
     sticks_brought = 3
     leaves_brought = 4
     dropped_baggage_needed = 3
     nights_slept = 0
+    well_rested = false
     update_objectives()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -229,6 +235,19 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
                     compton_himself.sayText("Berry Eaten.", 500, false)
                     yummers_eaten += 1
                     update_objectives()
+                    if (current_level == 3 && yummers_eaten == 2) {
+                        if (shelter_built) {
+                            compton_himself.sayText("Im getting really tired now,", 1500, false)
+                            timer.after(1500, function () {
+                                compton_himself.sayText("Not much left to do today anyway,", 1500, false)
+                                timer.after(1500, function () {
+                                    compton_himself.sayText("I should go sleep in my shelter.", 1500, false)
+                                    sleeping_allowed = true
+                                    update_objectives()
+                                })
+                            })
+                        }
+                    }
                     toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
                     toolbar.update()
                     break;
@@ -271,6 +290,9 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                 if (water_collection_needed) {
                     objectives_get_water.setFlag(SpriteFlag.Invisible, false)
                 }
+                if (sleeping_needed && sleeping_allowed) {
+                    objectives_sleep.setFlag(SpriteFlag.Invisible, false)
+                }
                 if (dropped_baggage_gotten != dropped_baggage_needed) {
                     objectives_baggage.setFlag(SpriteFlag.Invisible, false)
                 }
@@ -289,6 +311,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                 objectives_shown = 0
                 objectives2.setFlag(SpriteFlag.Invisible, true)
                 objectives_get_water.setFlag(SpriteFlag.Invisible, true)
+                objectives_sleep.setFlag(SpriteFlag.Invisible, true)
                 if (dropped_baggage_gotten != dropped_baggage_needed) {
                     objectives_baggage.setFlag(SpriteFlag.Invisible, true)
                 }
@@ -334,7 +357,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, l
     add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
 })
 function start_game () {
-    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", true)
+    transition2("After getting lost on a", "hike, you end up finding", "yourself in a clearing...", false)
     toolbar.setFlag(SpriteFlag.Invisible, false)
     toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
     main_menu = 1
@@ -433,7 +456,17 @@ function level_objectives () {
         water_needed = 0
         yummers_eaten = 0
         yummers_needed = 2
+        sleeping_needed = true
         objectives_complete = false
+        update_objectives()
+    } else if (current_level == 4) {
+        yummers_needed = 3
+        water_needed = 1
+        objectives_complete = false
+        update_objectives()
+    } else if (current_level == 5) {
+        update_objectives()
+    } else if (current_level == 6) {
         update_objectives()
     }
 }
@@ -447,10 +480,13 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(44, 21))
         tiles.setCurrentTilemap(levels[current_level])
         transition2("You walk backwards", "and end up back in", "your campsite.", true)
-        tileUtil.createSpritesOnTiles(assets.tile`campfire`, assets.image`myImage1`, SpriteKind.fire)
         yummers_eaten = 0
+        yummers_needed = 0
         water_drunk = 0
+        water_needed = 0
         objectives_complete = false
+        travelling_back_needed = false
+        sleeping_needed = true
     }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function (sprite, location) {
@@ -468,9 +504,59 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function (sprite, l
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite, location) {
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B) && sleeping_needed) {
-        transition2("You take a well deserved", "rest inside your shelter.", "", true)
-        sleeping_needed = false
-        nights_slept += 1
+        if (sleeping_allowed) {
+            transition2("You sleep inside", " your shelter till", " tomorrow morning", true)
+            well_rested = true
+            nights_slept += 1
+            yummers_eaten = 0
+            yummers_needed = 0
+            water_drunk = 0
+            water_needed = 0
+            sleeping_needed = false
+            sleeping_allowed = false
+            travelling_away_needed = true
+            update_objectives()
+            if (nights_slept == 1) {
+                movement = 0
+                timer.after(2000, function () {
+                    compton_himself.sayText("Today I should go exploring to find more berries.", 2000, false)
+                    timer.after(2000, function () {
+                        compton_himself.sayText("But before that, I should boil some water at the fire.", 2000, false)
+                        timer.after(2000, function () {
+                            compton_himself.sayText("Best be off then!", 2000, false)
+                            movement = 1
+                        })
+                    })
+                })
+            } else if (nights_slept == 2) {
+                movement = 0
+                timer.after(2000, function () {
+                    compton_himself.sayText("Today I should go find a river for more water,", 2000, false)
+                    timer.after(2000, function () {
+                        compton_himself.sayText("Since I drank my supply yesterday.", 2000, false)
+                        timer.after(2000, function () {
+                            compton_himself.sayText("I should also find some berries along with that.", 2000, false)
+                            timer.after(2000, function () {
+                                compton_himself.sayText("Best be off then!", 2000, false)
+                                movement = 1
+                            })
+                        })
+                    })
+                })
+            } else if (nights_slept == 3) {
+                movement = 0
+                timer.after(2000, function () {
+                    compton_himself.sayText("Today I should go exploring to find more berries.", 2000, false)
+                    timer.after(2000, function () {
+                        compton_himself.sayText("But before that, I should boil some water at the fire.", 2000, false)
+                        timer.after(2000, function () {
+                            compton_himself.sayText("Best be off then!", 2000, false)
+                            movement = 1
+                        })
+                    })
+                })
+            }
+        }
     }
 })
 controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -564,7 +650,7 @@ function update_objectives () {
         objectives_leaves.setFlag(SpriteFlag.Invisible, true)
         objectives_baggage = textsprite.create("Find Lost Items " + dropped_baggage_gotten + "/3", 0, 15)
         objectives_baggage.setFlag(SpriteFlag.Invisible, true)
-        objectives_sleep = textsprite.create("Go to sleep in your shelter", 0, 15)
+        objectives_sleep = textsprite.create("Sleep in the shelter", 0, 15)
         objectives_sleep.setFlag(SpriteFlag.Invisible, true)
         objectives_get_water = textsprite.create("Fill up your bottle", 0, 15)
         objectives_get_water.setFlag(SpriteFlag.Invisible, true)
@@ -591,9 +677,9 @@ function update_objectives () {
             objectives_sticks.setFlag(SpriteFlag.Invisible, false)
             objectives_leaves.setFlag(SpriteFlag.Invisible, false)
         }
-        if (sleeping_needed) {
+        if (sleeping_needed && sleeping_allowed) {
             sprites.destroy(objectives_sleep)
-            objectives_sleep = textsprite.create("Go to sleep in your shelter", 0, 15)
+            objectives_sleep = textsprite.create("Sleep in the shelter", 0, 15)
             objectives_sleep.setFlag(SpriteFlag.Invisible, false)
         }
         if (water_collection_needed) {
@@ -615,7 +701,7 @@ scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (spri
     toolbar_movement_enabled = true
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
-    if (objectives_complete) {
+    if (objectives_complete || well_rested) {
         current_level += 1
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
@@ -627,10 +713,10 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
         water_drunk = 0
         level_objectives()
         objectives_complete = false
+        travelling_away_needed = false
     }
 })
 let textSprite: TextSprite = null
-let objectives_sleep: TextSprite = null
 let water_needed = 0
 let yummers_needed = 0
 let tutorial_enabled = false
@@ -638,13 +724,18 @@ let myMenu: miniMenu.MenuSprite = null
 let objectives_water: TextSprite = null
 let objectives_food: TextSprite = null
 let objectives_baggage: TextSprite = null
+let objectives_sleep: TextSprite = null
 let objectives_get_water: TextSprite = null
 let dropped_items: Sprite = null
 let yummers_eaten = 0
 let water_drunk = 0
+let well_rested = false
 let nights_slept = 0
 let dropped_baggage_needed = 0
 let leaves_brought = 0
+let sleeping_allowed = false
+let travelling_away_needed = false
+let travelling_back_needed = false
 let water_collection_needed = false
 let sleeping_needed = false
 let tutorial_log = false
@@ -692,7 +783,7 @@ forever(function () {
     } else if (yummers_needed == yummers_eaten) {
         objectives_food.setFlag(SpriteFlag.Invisible, true)
         if (yummers_needed == yummers_eaten && water_needed == water_drunk) {
-            if (water_collection_needed == false) {
+            if (water_collection_needed == false && sleeping_needed == false) {
                 objectives_complete = true
             }
         }
@@ -702,7 +793,7 @@ forever(function () {
     } else if (water_needed == water_drunk) {
         objectives_water.setFlag(SpriteFlag.Invisible, true)
         if (yummers_needed == yummers_eaten && water_needed == water_drunk) {
-            if (water_collection_needed == false) {
+            if (water_collection_needed == false && sleeping_needed == false) {
                 objectives_complete = true
             }
         }
@@ -777,7 +868,7 @@ forever(function () {
     objectives_baggage.z = 100
     objectives_baggage.setFlag(SpriteFlag.RelativeToCamera, true)
     objectives_sleep.left = 4
-    objectives_sleep.top = 26
+    objectives_sleep.top = 15
     objectives_sleep.z = 100
     objectives_sleep.setFlag(SpriteFlag.RelativeToCamera, true)
     objectives_get_water.left = 4
