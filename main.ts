@@ -210,6 +210,7 @@ function create_starting_assets () {
     dropped_baggage_needed = 3
     nights_slept = 0
     well_rested = false
+    water_boiled = false
     update_objectives()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -290,6 +291,12 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                 if (water_collection_needed) {
                     objectives_get_water.setFlag(SpriteFlag.Invisible, false)
                 }
+                if (travelling_away_needed) {
+                    objectives_explore.setFlag(SpriteFlag.Invisible, false)
+                }
+                if (travelling_back_needed) {
+                    objectives_leave.setFlag(SpriteFlag.Invisible, false)
+                }
                 if (sleeping_needed && sleeping_allowed) {
                     objectives_sleep.setFlag(SpriteFlag.Invisible, false)
                 }
@@ -347,6 +354,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.fire, function (sprite, otherSpr
             compton_himself.sayText("You use your pot to boil the water.", 1000, false)
             toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Clean Water", assets.image`clean_water`)
             toolbar.update()
+            if (current_level == 3) {
+                water_boiled = true
+            }
         }
     }
 })
@@ -654,6 +664,10 @@ function update_objectives () {
         objectives_sleep.setFlag(SpriteFlag.Invisible, true)
         objectives_get_water = textsprite.create("Fill up your bottle", 0, 15)
         objectives_get_water.setFlag(SpriteFlag.Invisible, true)
+        objectives_explore = textsprite.create("Leave to explore", 0, 15)
+        objectives_explore.setFlag(SpriteFlag.Invisible, true)
+        objectives_leave = textsprite.create("Go back to camp", 0, 15)
+        objectives_leave.setFlag(SpriteFlag.Invisible, true)
     } else {
         sprites.destroy(objectives_shelter)
         sprites.destroy(objectives_food)
@@ -687,6 +701,16 @@ function update_objectives () {
             objectives_get_water = textsprite.create("Fill up your bottle", 0, 15)
             objectives_get_water.setFlag(SpriteFlag.Invisible, false)
         }
+        if (travelling_away_needed) {
+            sprites.destroy(objectives_explore)
+            objectives_explore = textsprite.create("Leave to explore", 0, 15)
+            objectives_explore.setFlag(SpriteFlag.Invisible, true)
+        }
+        if (travelling_back_needed) {
+            sprites.destroy(objectives_leave)
+            objectives_leave = textsprite.create("Leave to explore", 0, 15)
+            objectives_leave.setFlag(SpriteFlag.Invisible, true)
+        }
     }
     objectives_food.setOutline(1, 1)
     objectives_water.setOutline(1, 1)
@@ -696,12 +720,28 @@ function update_objectives () {
     objectives_baggage.setOutline(1, 1)
     objectives_sleep.setOutline(1, 1)
     objectives_get_water.setOutline(1, 1)
+    objectives_explore.setOutline(1, 1)
+    objectives_leave.setOutline(1, 1)
 }
 scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
     toolbar_movement_enabled = true
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
-    if (objectives_complete || well_rested) {
+    if (current_level == 3 && water_boiled) {
+        current_level += 1
+        tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
+        tiles.setCurrentTilemap(levels[current_level])
+        transition2("After walking for a", "while, you stumble upon", "another clearing...", true)
+        tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
+        tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
+        level_position_index += 2
+        yummers_eaten = 0
+        water_drunk = 0
+        level_objectives()
+        objectives_complete = false
+        travelling_away_needed = false
+        water_boiled = false
+    } else if (objectives_complete || well_rested) {
         current_level += 1
         tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
         tiles.setCurrentTilemap(levels[current_level])
@@ -725,10 +765,13 @@ let objectives_water: TextSprite = null
 let objectives_food: TextSprite = null
 let objectives_baggage: TextSprite = null
 let objectives_sleep: TextSprite = null
+let objectives_leave: TextSprite = null
+let objectives_explore: TextSprite = null
 let objectives_get_water: TextSprite = null
 let dropped_items: Sprite = null
 let yummers_eaten = 0
 let water_drunk = 0
+let water_boiled = false
 let well_rested = false
 let nights_slept = 0
 let dropped_baggage_needed = 0
@@ -875,6 +918,14 @@ forever(function () {
     objectives_get_water.top = 37
     objectives_get_water.z = 100
     objectives_get_water.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_leave.left = 4
+    objectives_leave.top = 15
+    objectives_leave.z = 100
+    objectives_leave.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_explore.left = 4
+    objectives_explore.top = 37
+    objectives_explore.z = 100
+    objectives_explore.setFlag(SpriteFlag.RelativeToCamera, true)
 })
 forever(function () {
     if (main_menu == 1) {
