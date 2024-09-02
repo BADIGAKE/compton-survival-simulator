@@ -172,10 +172,10 @@ function create_starting_assets () {
     25,
     9,
     20,
-    9,
+    10,
     25,
-    9,
-    44
+    8,
+    40
     ]
     edible_food = [assets.image`myImage2`, assets.image`myImage3`, assets.image`myImage4`]
     main_menu = 0
@@ -214,7 +214,7 @@ function create_starting_assets () {
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
         if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
-            if (tutorial_log) {
+            if (tutorial_log || current_level == 3) {
                 compton_himself.sayText("Water Drunk", 500, false)
                 water_drunk += 1
                 if (current_level == 2) {
@@ -229,29 +229,33 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
             compton_himself.sayText("I need to boil this water first.", 500, false)
         } else {
-            for (let index = 0; index <= edible_food.length - 1; index++) {
-                if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(edible_food[index])) {
-                    compton_himself.sayText("Berry Eaten.", 500, false)
-                    yummers_eaten += 1
-                    update_objectives()
-                    if (current_level == 3 && yummers_eaten == 2) {
-                        if (shelter_built) {
-                            compton_himself.sayText("Im getting really tired now,", 1500, false)
-                            timer.after(1500, function () {
-                                compton_himself.sayText("Not much left to do today anyway,", 1500, false)
-                                timer.after(1500, function () {
-                                    compton_himself.sayText("I should go sleep in my shelter.", 1500, false)
-                                    sleeping_allowed = true
-                                    update_objectives()
+            if (current_level == 3 && shelter_built == false) {
+                compton_himself.sayText("I should build the shelter first", 500, false)
+            } else {
+                for (let index = 0; index <= edible_food.length - 1; index++) {
+                    if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(edible_food[index])) {
+                        compton_himself.sayText("Berry Eaten.", 500, false)
+                        yummers_eaten += 1
+                        update_objectives()
+                        if (current_level == 3 && yummers_eaten == 2) {
+                            if (shelter_built) {
+                                compton_himself.sayText("Im getting really tired now,", 2000, false)
+                                timer.after(2000, function () {
+                                    compton_himself.sayText("Not much left to do today anyway,", 2000, false)
+                                    timer.after(2000, function () {
+                                        compton_himself.sayText("I should go sleep in my shelter.", 2000, false)
+                                        sleeping_allowed = true
+                                        update_objectives()
+                                    })
                                 })
-                            })
+                            }
                         }
+                        toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
+                        toolbar.update()
+                        break;
+                    } else {
+                        compton_himself.sayText("I cant eat that", 500, false)
                     }
-                    toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
-                    toolbar.update()
-                    break;
-                } else {
-                    compton_himself.sayText("I cant eat that", 500, false)
                 }
             }
         }
@@ -467,14 +471,19 @@ function level_objectives () {
         sleeping_needed = true
         objectives_complete = false
         update_objectives()
-    } else if (current_level == 4) {
+    } else if (nights_slept == 1) {
         yummers_needed = 3
         water_needed = 1
         objectives_complete = false
         update_objectives()
-    } else if (current_level == 5) {
+    } else if (nights_slept == 2) {
+        yummers_needed = 1
+        water_needed = 0
+        objectives_complete = false
         update_objectives()
-    } else if (current_level == 6) {
+    } else if (nights_slept == 3) {
+        yummers_needed = 0
+        objectives_complete = false
         update_objectives()
     }
 }
@@ -495,6 +504,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         objectives_complete = false
         travelling_back_needed = false
         sleeping_needed = true
+        sleeping_allowed = true
         sprites.destroy(objectives_leave)
         update_objectives()
     }
@@ -746,12 +756,26 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
         update_objectives()
     } else if (objectives_complete || well_rested) {
         current_level += 1
-        tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
-        tiles.setCurrentTilemap(levels[current_level])
+        if (nights_slept == 1) {
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
+            tiles.setCurrentTilemap(levels[current_level + 1])
+            level_position_index += -2
+        } else if (nights_slept == 2) {
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index + 2], level_starting_positions[level_position_index + 3]))
+            tiles.setCurrentTilemap(levels[current_level + 1])
+            level_position_index += -2
+        } else if (nights_slept == 3) {
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index + 4], level_starting_positions[level_position_index + (nights_slept + 5)]))
+            tiles.setCurrentTilemap(levels[current_level + 2])
+            level_position_index += -2
+        } else {
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
+            tiles.setCurrentTilemap(levels[current_level])
+        }
+        level_position_index += 2
         transition2("After walking for a", "while, you stumble upon", "another clearing...", true)
         tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
         tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
-        level_position_index += 2
         yummers_eaten = 0
         water_drunk = 0
         level_objectives()
@@ -965,7 +989,7 @@ forever(function () {
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`left_compy`,
-                100,
+                80,
                 true
                 )
                 pause(200)
@@ -976,7 +1000,7 @@ forever(function () {
                 animation.runImageAnimation(
                 compton_himself,
                 assets.animation`right_compy`,
-                100,
+                80,
                 true
                 )
                 pause(200)
