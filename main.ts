@@ -525,6 +525,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
             sleeping_needed = false
             sleeping_allowed = false
             travelling_away_needed = true
+            sprites.destroy(objectives_sleep)
             update_objectives()
             if (nights_slept == 1) {
                 movement = 0
