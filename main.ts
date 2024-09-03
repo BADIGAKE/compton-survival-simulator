@@ -174,7 +174,7 @@ function create_starting_assets () {
     20,
     10,
     25,
-    8,
+    7,
     40
     ]
     edible_food = [assets.image`myImage2`, assets.image`myImage3`, assets.image`myImage4`]
@@ -214,7 +214,9 @@ function create_starting_assets () {
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
         if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
-            if (tutorial_log || current_level == 3) {
+            if (current_level == 3) {
+                compton_himself.sayText("I should save this for when I'm somewhere else.", 500, false)
+            } else if (tutorial_log) {
                 compton_himself.sayText("Water Drunk", 500, false)
                 water_drunk += 1
                 if (current_level == 2) {
@@ -754,20 +756,17 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
         water_boiled = false
         sprites.destroy(objectives_explore)
         update_objectives()
-    } else if (objectives_complete || well_rested) {
+    } else if ((objectives_complete || well_rested) && current_level != 3) {
         current_level += 1
         if (nights_slept == 1) {
-            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
-            tiles.setCurrentTilemap(levels[current_level + 1])
-            level_position_index += -2
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[6], level_starting_positions[7]))
+            tiles.setCurrentTilemap(levels[4])
         } else if (nights_slept == 2) {
-            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index + 2], level_starting_positions[level_position_index + 3]))
-            tiles.setCurrentTilemap(levels[current_level + 1])
-            level_position_index += -2
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[8], level_starting_positions[9]))
+            tiles.setCurrentTilemap(levels[5])
         } else if (nights_slept == 3) {
-            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index + 4], level_starting_positions[level_position_index + (nights_slept + 5)]))
-            tiles.setCurrentTilemap(levels[current_level + 2])
-            level_position_index += -2
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[10], level_starting_positions[11]))
+            tiles.setCurrentTilemap(levels[6])
         } else {
             tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
             tiles.setCurrentTilemap(levels[current_level])
