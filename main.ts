@@ -484,7 +484,8 @@ function level_objectives () {
         objectives_complete = false
         update_objectives()
     } else if (nights_slept == 3) {
-        yummers_needed = 0
+        yummers_needed = 3
+        water_needed = 1
         objectives_complete = false
         update_objectives()
     }
@@ -530,6 +531,9 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
             transition2("You sleep inside", " your shelter till", " tomorrow morning", true)
             well_rested = true
             nights_slept += 1
+            if (nights_slept != 1) {
+                water_boiled = true
+            }
             yummers_eaten = 0
             yummers_needed = 0
             water_drunk = 0
@@ -742,8 +746,16 @@ scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (spri
 scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite, location) {
     if (current_level == 3 && water_boiled) {
         current_level += 1
-        tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
-        tiles.setCurrentTilemap(levels[current_level])
+        if (nights_slept == 1) {
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[6], level_starting_positions[7]))
+            tiles.setCurrentTilemap(levels[4])
+        } else if (nights_slept == 2) {
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[8], level_starting_positions[9]))
+            tiles.setCurrentTilemap(levels[5])
+        } else if (nights_slept == 3) {
+            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[10], level_starting_positions[11]))
+            tiles.setCurrentTilemap(levels[6])
+        }
         transition2("After walking for a", "while, you stumble upon", "another clearing...", true)
         tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
         tileUtil.createSpritesOnTiles(assets.tile`leaves`, assets.image`fallen_leaves`, SpriteKind.leaf)
@@ -758,19 +770,8 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
         update_objectives()
     } else if ((objectives_complete || well_rested) && current_level != 3) {
         current_level += 1
-        if (nights_slept == 1) {
-            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[6], level_starting_positions[7]))
-            tiles.setCurrentTilemap(levels[4])
-        } else if (nights_slept == 2) {
-            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[8], level_starting_positions[9]))
-            tiles.setCurrentTilemap(levels[5])
-        } else if (nights_slept == 3) {
-            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[10], level_starting_positions[11]))
-            tiles.setCurrentTilemap(levels[6])
-        } else {
-            tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
-            tiles.setCurrentTilemap(levels[current_level])
-        }
+        tiles.placeOnTile(compton_himself, tiles.getTileLocation(level_starting_positions[level_position_index], level_starting_positions[level_position_index + 1]))
+        tiles.setCurrentTilemap(levels[current_level])
         level_position_index += 2
         transition2("After walking for a", "while, you stumble upon", "another clearing...", true)
         tileUtil.createSpritesOnTiles(assets.tile`sticks`, assets.image`stick`, SpriteKind.stick)
