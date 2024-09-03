@@ -5,6 +5,7 @@ namespace SpriteKind {
     export const stick = SpriteKind.create()
     export const transition = SpriteKind.create()
     export const lost_baggage = SpriteKind.create()
+    export const salvation = SpriteKind.create()
 }
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
     add_berry(assets.tile`myTile0`, assets.tile`myTile`, assets.image`myImage4`, "Blackberry")
@@ -173,7 +174,7 @@ function create_starting_assets () {
     9,
     20,
     10,
-    25,
+    23,
     7,
     40
     ]
@@ -203,12 +204,14 @@ function create_starting_assets () {
     travelling_back_needed = false
     travelling_away_needed = false
     sleeping_allowed = false
+    obj_and_eating_toggle = true
     sticks_brought = 3
     leaves_brought = 4
     dropped_baggage_needed = 3
     nights_slept = 0
     well_rested = false
-    water_boiled = false
+    water_boiled = true
+    coming_back = false
     update_objectives()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -272,72 +275,78 @@ sprites.onCreated(SpriteKind.fire, function (sprite) {
     )
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
-        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`no_water`)) {
-            compton_himself.sayText("I'm going to need this for water.", 200, false)
-        } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
-            compton_himself.sayText("I'm going to need this for water.", 200, false)
-        } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
-            compton_himself.sayText("I'm going to need this for water.", 200, false)
-        } else {
-            dropped_items = sprites.create(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image(), SpriteKind.Food)
-            scaling.scaleToPercent(dropped_items, 60, ScaleDirection.Uniformly, ScaleAnchor.Middle)
-            dropped_items.setPosition(compton_himself.x, compton_himself.y)
-            dropped_items.z = 98
-            toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
-            toolbar.update()
-        }
-    } else {
-        if (main_menu == 1) {
-            if (objectives_shown == 0) {
-                objectives_shown = 1
-                objectives2.setFlag(SpriteFlag.Invisible, false)
-                if (water_collection_needed) {
-                    objectives_get_water.setFlag(SpriteFlag.Invisible, false)
-                }
-                if (travelling_away_needed) {
-                    objectives_explore.setFlag(SpriteFlag.Invisible, false)
-                }
-                if (travelling_back_needed) {
-                    objectives_leave.setFlag(SpriteFlag.Invisible, false)
-                }
-                if (sleeping_needed && sleeping_allowed) {
-                    objectives_sleep.setFlag(SpriteFlag.Invisible, false)
-                }
-                if (dropped_baggage_gotten != dropped_baggage_needed) {
-                    objectives_baggage.setFlag(SpriteFlag.Invisible, false)
-                }
-                if (shelter_built == false) {
-                    objectives_food.setFlag(SpriteFlag.Invisible, false)
-                    objectives_water.setFlag(SpriteFlag.Invisible, false)
-                    if (shelter_not_found == false) {
-                        objectives_sticks.setFlag(SpriteFlag.Invisible, false)
-                        objectives_leaves.setFlag(SpriteFlag.Invisible, false)
-                    }
-                } else {
-                    objectives_food.setFlag(SpriteFlag.Invisible, false)
-                    objectives_water.setFlag(SpriteFlag.Invisible, false)
-                }
+    if (obj_and_eating_toggle) {
+        if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] && toolbar_enabled) {
+            if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`no_water`)) {
+                compton_himself.sayText("I'm going to need this for water.", 200, false)
+            } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`dirty_water`)) {
+                compton_himself.sayText("I'm going to need this for water.", 200, false)
+            } else if (toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image().equals(assets.image`clean_water`)) {
+                compton_himself.sayText("I'm going to need this for water.", 200, false)
             } else {
-                objectives_shown = 0
-                objectives2.setFlag(SpriteFlag.Invisible, true)
-                objectives_get_water.setFlag(SpriteFlag.Invisible, true)
-                objectives_sleep.setFlag(SpriteFlag.Invisible, true)
-                objectives_explore.setFlag(SpriteFlag.Invisible, true)
-                objectives_leave.setFlag(SpriteFlag.Invisible, true)
-                if (dropped_baggage_gotten != dropped_baggage_needed) {
-                    objectives_baggage.setFlag(SpriteFlag.Invisible, true)
-                }
-                if (shelter_built == false) {
-                    objectives_food.setFlag(SpriteFlag.Invisible, true)
-                    objectives_water.setFlag(SpriteFlag.Invisible, true)
-                    if (shelter_not_found == false) {
-                        objectives_sticks.setFlag(SpriteFlag.Invisible, true)
-                        objectives_leaves.setFlag(SpriteFlag.Invisible, true)
+                dropped_items = sprites.create(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image(), SpriteKind.Food)
+                scaling.scaleToPercent(dropped_items, 60, ScaleDirection.Uniformly, ScaleAnchor.Middle)
+                dropped_items.setPosition(compton_himself.x, compton_himself.y)
+                dropped_items.z = 98
+                toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
+                toolbar.update()
+            }
+        } else {
+            if (main_menu == 1) {
+                if (objectives_shown == 0) {
+                    objectives_shown = 1
+                    objectives2.setFlag(SpriteFlag.Invisible, false)
+                    if (water_collection_needed) {
+                        objectives_get_water.setFlag(SpriteFlag.Invisible, false)
+                    }
+                    if (water_boiled == false && coming_back == false) {
+                        objectives_boiling.setFlag(SpriteFlag.Invisible, false)
+                    }
+                    if (travelling_away_needed) {
+                        objectives_explore.setFlag(SpriteFlag.Invisible, false)
+                    }
+                    if (travelling_back_needed) {
+                        objectives_leave.setFlag(SpriteFlag.Invisible, false)
+                    }
+                    if (sleeping_needed && sleeping_allowed) {
+                        objectives_sleep.setFlag(SpriteFlag.Invisible, false)
+                    }
+                    if (dropped_baggage_gotten != dropped_baggage_needed) {
+                        objectives_baggage.setFlag(SpriteFlag.Invisible, false)
+                    }
+                    if (shelter_built == false) {
+                        objectives_food.setFlag(SpriteFlag.Invisible, false)
+                        objectives_water.setFlag(SpriteFlag.Invisible, false)
+                        if (shelter_not_found == false) {
+                            objectives_sticks.setFlag(SpriteFlag.Invisible, false)
+                            objectives_leaves.setFlag(SpriteFlag.Invisible, false)
+                        }
+                    } else {
+                        objectives_food.setFlag(SpriteFlag.Invisible, false)
+                        objectives_water.setFlag(SpriteFlag.Invisible, false)
                     }
                 } else {
-                    objectives_food.setFlag(SpriteFlag.Invisible, true)
-                    objectives_water.setFlag(SpriteFlag.Invisible, true)
+                    objectives_shown = 0
+                    objectives2.setFlag(SpriteFlag.Invisible, true)
+                    objectives_get_water.setFlag(SpriteFlag.Invisible, true)
+                    objectives_sleep.setFlag(SpriteFlag.Invisible, true)
+                    objectives_explore.setFlag(SpriteFlag.Invisible, true)
+                    objectives_leave.setFlag(SpriteFlag.Invisible, true)
+                    objectives_boiling.setFlag(SpriteFlag.Invisible, true)
+                    if (dropped_baggage_gotten != dropped_baggage_needed) {
+                        objectives_baggage.setFlag(SpriteFlag.Invisible, true)
+                    }
+                    if (shelter_built == false) {
+                        objectives_food.setFlag(SpriteFlag.Invisible, true)
+                        objectives_water.setFlag(SpriteFlag.Invisible, true)
+                        if (shelter_not_found == false) {
+                            objectives_sticks.setFlag(SpriteFlag.Invisible, true)
+                            objectives_leaves.setFlag(SpriteFlag.Invisible, true)
+                        }
+                    } else {
+                        objectives_food.setFlag(SpriteFlag.Invisible, true)
+                        objectives_water.setFlag(SpriteFlag.Invisible, true)
+                    }
                 }
             }
         }
@@ -358,15 +367,22 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.fire, function (sprite, otherSpr
             compton_himself.sayText("You use your pot to boil the water.", 1000, false)
             toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)] = Inventory.create_item("Clean Water", assets.image`clean_water`)
             toolbar.update()
-            if (current_level == 3) {
-                water_boiled = true
-            }
+            water_boiled = true
+            sprites.destroy(objectives_boiling)
+            update_objectives()
         }
     }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_1`, function (sprite, location) {
     add_berry(assets.tile`berry_1`, sprites.castle.saplingPine, assets.image`myImage3`, "Kotukutuku")
 })
+function ending_cutscene () {
+    movement = 0
+    saviour = sprites.create(assets.image`saviour`, SpriteKind.salvation)
+    tiles.placeOnTile(saviour, tiles.getTileLocation(0, 0))
+    saviour2 = sprites.create(assets.image`saviour`, SpriteKind.salvation)
+    tiles.placeOnTile(saviour2, tiles.getTileLocation(0, 0))
+}
 scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_2`, function (sprite, location) {
     add_berry(assets.tile`berry_2`, sprites.castle.saplingOak, assets.image`myImage2`, "Kotukutuku")
 })
@@ -490,9 +506,6 @@ function level_objectives () {
         update_objectives()
     }
 }
-scene.onOverlapTile(SpriteKind.Player, sprites.castle.tilePath5, function (sprite, location) {
-    toolbar_movement_enabled = true
-})
 scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sprite, location) {
     if (objectives_complete) {
         current_level = 3
@@ -508,6 +521,8 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`previous_level`, function (sp
         travelling_back_needed = false
         sleeping_needed = true
         sleeping_allowed = true
+        water_boiled = false
+        coming_back = true
         sprites.destroy(objectives_leave)
         update_objectives()
     }
@@ -531,8 +546,12 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
             transition2("You sleep inside", " your shelter till", " tomorrow morning", true)
             well_rested = true
             nights_slept += 1
-            if (nights_slept != 1) {
+            if (nights_slept == 2) {
                 water_boiled = true
+            } else if (nights_slept > 3) {
+                water_boiled = true
+            } else {
+                water_boiled = false
             }
             yummers_eaten = 0
             yummers_needed = 0
@@ -540,7 +559,10 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
             water_needed = 0
             sleeping_needed = false
             sleeping_allowed = false
-            travelling_away_needed = true
+            coming_back = false
+            if (nights_slept < 4) {
+                travelling_away_needed = true
+            }
             sprites.destroy(objectives_sleep)
             update_objectives()
             if (nights_slept == 1) {
@@ -614,6 +636,9 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`log discovery`, function (spr
         })
     })
 })
+scene.onOverlapTile(SpriteKind.Player, assets.tile`shelter0`, function (sprite, location) {
+    toolbar_movement_enabled = true
+})
 function add_berry (initial_tile: Image, end_tile: Image, berry: Image, berry_name: string) {
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B)) {
         toolbar.change_number(ToolbarNumberAttribute.SelectedIndex, -1)
@@ -685,6 +710,8 @@ function update_objectives () {
         objectives_explore.setFlag(SpriteFlag.Invisible, true)
         objectives_leave = textsprite.create("Go back to camp", 0, 15)
         objectives_leave.setFlag(SpriteFlag.Invisible, true)
+        objectives_boiling = textsprite.create("Boil your water", 0, 15)
+        objectives_boiling.setFlag(SpriteFlag.Invisible, true)
     } else {
         sprites.destroy(objectives_shelter)
         sprites.destroy(objectives_food)
@@ -728,6 +755,11 @@ function update_objectives () {
             objectives_leave = textsprite.create("Go back to camp", 0, 15)
             objectives_leave.setFlag(SpriteFlag.Invisible, false)
         }
+        if (water_boiled == false && coming_back == false) {
+            sprites.destroy(objectives_boiling)
+            objectives_boiling = textsprite.create("Boil your water", 0, 15)
+            objectives_boiling.setFlag(SpriteFlag.Invisible, false)
+        }
     }
     objectives_food.setOutline(1, 1)
     objectives_water.setOutline(1, 1)
@@ -739,6 +771,7 @@ function update_objectives () {
     objectives_get_water.setOutline(1, 1)
     objectives_explore.setOutline(1, 1)
     objectives_leave.setOutline(1, 1)
+    objectives_boiling.setOutline(1, 1)
 }
 scene.onOverlapTile(SpriteKind.Player, sprites.castle.tileGrass1, function (sprite, location) {
     toolbar_movement_enabled = true
@@ -765,7 +798,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`next_level`, function (sprite
         level_objectives()
         objectives_complete = false
         travelling_away_needed = false
-        water_boiled = false
         sprites.destroy(objectives_explore)
         update_objectives()
     } else if ((objectives_complete || well_rested) && current_level != 3) {
@@ -790,21 +822,26 @@ let water_needed = 0
 let yummers_needed = 0
 let tutorial_enabled = false
 let myMenu: miniMenu.MenuSprite = null
+let saviour2: Sprite = null
+let saviour: Sprite = null
 let objectives_water: TextSprite = null
 let objectives_food: TextSprite = null
 let objectives_baggage: TextSprite = null
 let objectives_sleep: TextSprite = null
 let objectives_leave: TextSprite = null
 let objectives_explore: TextSprite = null
+let objectives_boiling: TextSprite = null
 let objectives_get_water: TextSprite = null
 let dropped_items: Sprite = null
 let yummers_eaten = 0
 let water_drunk = 0
+let coming_back = false
 let water_boiled = false
 let well_rested = false
 let nights_slept = 0
 let dropped_baggage_needed = 0
 let leaves_brought = 0
+let obj_and_eating_toggle = false
 let sleeping_allowed = false
 let travelling_away_needed = false
 let travelling_back_needed = false
@@ -958,6 +995,10 @@ forever(function () {
     objectives_explore.top = 15
     objectives_explore.z = 100
     objectives_explore.setFlag(SpriteFlag.RelativeToCamera, true)
+    objectives_boiling.left = 4
+    objectives_boiling.top = 26
+    objectives_boiling.z = 100
+    objectives_boiling.setFlag(SpriteFlag.RelativeToCamera, true)
 })
 forever(function () {
     if (main_menu == 1) {
