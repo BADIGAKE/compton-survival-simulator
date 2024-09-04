@@ -213,8 +213,8 @@ function create_starting_assets () {
     travelling_away_needed = false
     sleeping_allowed = false
     obj_and_eating_toggle = true
-    sticks_brought = 0
-    leaves_brought = 0
+    sticks_brought = 3
+    leaves_brought = 4
     dropped_baggage_needed = 3
     nights_slept = 0
     well_rested = false
@@ -297,7 +297,6 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                 compton_himself.sayText("I'm going to need this for water.", 200, false)
             } else {
                 dropped_items = sprites.create(toolbar.get_items()[toolbar.get_number(ToolbarNumberAttribute.SelectedIndex)].get_image(), SpriteKind.Food)
-                scaling.scaleToPercent(dropped_items, 60, ScaleDirection.Uniformly, ScaleAnchor.Middle)
                 dropped_items.setPosition(compton_himself.x, compton_himself.y)
                 dropped_items.z = 98
                 toolbar.get_items().removeAt(toolbar.get_number(ToolbarNumberAttribute.SelectedIndex))
@@ -412,47 +411,52 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`berry_1`, function (sprite, l
 })
 function ending_cutscene () {
     timer.after(1500, function () {
+        toolbar.set_number(ToolbarNumberAttribute.SelectedIndex, -1)
+        toolbar_enabled = false
+        sprites.destroy(toolbar)
+        tiles.placeOnTile(compton_himself, tiles.getTileLocation(24, 17))
         sprites.destroy(compton_himself)
         everything_toggle(false)
         movement = 0
         saviour = sprites.create(assets.image`saviour`, SpriteKind.salvation)
         tiles.placeOnTile(saviour, tiles.getTileLocation(23, 17))
-        compton_himself = sprites.create(assets.image`savied`, SpriteKind.Player)
-        tiles.placeOnTile(compton_himself, tiles.getTileLocation(25, 17))
-        saviour.sayText("We finally found you!", 2000, false)
+        victim = sprites.create(assets.image`savied`, SpriteKind.Player)
+        tiles.placeOnTile(victim, tiles.getTileLocation(25, 17))
         timer.after(2000, function () {
-            compton_himself.sayText("Thank goodness!", 2000, false)
-            timer.after(2000, function () {
-                saviour.sayText("Lets go home now.", 2000, false)
-                timer.after(2000, function () {
-                    compton_himself.sayText("Alright then.", 2000, false)
-                    timer.after(2000, function () {
-                        saviour.sayText("Well hurry up then!", 1000, false)
-                        timer.after(1500, function () {
-                            saviour.vx += -80
-                            animation.runImageAnimation(
-                            saviour,
-                            assets.animation`saviour_walk`,
-                            80,
-                            true
-                            )
-                            compton_himself.sayText("Yes sir.", 500, false)
-                            timer.after(1000, function () {
-                                compton_himself.setFlag(SpriteFlag.RelativeToCamera, false)
-                                compton_himself.vx += -80
+            saviour.sayText("We finally found you!", 2000, false)
+            timer.after(2500, function () {
+                victim.sayText("Thank goodness!", 2000, false)
+                timer.after(2500, function () {
+                    saviour.sayText("Lets get you home now.", 2000, false)
+                    timer.after(2500, function () {
+                        victim.sayText("Alright then.", 2000, false)
+                        timer.after(2500, function () {
+                            saviour.sayText("Well hurry up then!", 1000, false)
+                            timer.after(500, function () {
+                                saviour.vx += -80
                                 animation.runImageAnimation(
-                                compton_himself,
-                                assets.animation`left_compy`,
+                                saviour,
+                                assets.animation`saviour_walk`,
                                 80,
                                 true
                                 )
-                                timer.after(2000, function () {
-                                    transition2("", "", "", false)
-                                    sprites.destroy(compton_himself)
-                                    sprites.destroy(saviour)
-                                    tiles.setCurrentTilemap(tilemap`level6`)
-                                    endscreen = sprites.create(assets.image`myImage6`, SpriteKind.endscreen)
-                                    endscreen.z += 10000
+                                timer.after(1000, function () {
+                                    victim.sayText("Yes sir.", 500, false)
+                                    victim.vx += -80
+                                    animation.runImageAnimation(
+                                    victim,
+                                    assets.animation`left_compy`,
+                                    80,
+                                    true
+                                    )
+                                    timer.after(2000, function () {
+                                        transition2("", "", "", false)
+                                        sprites.destroy(victim)
+                                        sprites.destroy(saviour)
+                                        sprites.destroy(campfire)
+                                        tiles.setCurrentTilemap(tilemap`level6`)
+                                        scene.setBackgroundImage(assets.image`myImage6`)
+                                    })
                                 })
                             })
                         })
@@ -631,7 +635,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function (sprite, l
 scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite, location) {
     if (mp.isButtonPressed(mp.playerSelector(mp.PlayerNumber.Two), mp.MultiplayerButton.B) && sleeping_needed) {
         if (sleeping_allowed) {
-            transition2("You sleep inside", " your shelter till", " tomorrow morning", true)
+            transition2("You sleep inside", " your shelter till", " tomorrow morning", false)
             well_rested = true
             nights_slept += 1
             if (nights_slept == 2) {
@@ -658,7 +662,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
             sprites.destroy(objectives_sleep)
             update_objectives()
             if (nights_slept == 1) {
-                movement = 0
                 everything_toggle(false)
                 timer.after(4000, function () {
                     compton_himself.sayText("Today I should go exploring to find more berries.", 3000, false)
@@ -672,7 +675,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
                     })
                 })
             } else if (nights_slept == 2) {
-                movement = 0
                 everything_toggle(false)
                 timer.after(3000, function () {
                     compton_himself.sayText("Today I should go find a river for more water,", 3000, false)
@@ -689,7 +691,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`camp_right`, function (sprite
                     })
                 })
             } else if (nights_slept == 3) {
-                movement = 0
                 everything_toggle(false)
                 timer.after(3000, function () {
                     compton_himself.sayText("I should go exploring to find more berries again.", 3000, false)
@@ -948,7 +949,7 @@ let water_needed = 0
 let yummers_needed = 0
 let tutorial_enabled = false
 let myMenu: miniMenu.MenuSprite = null
-let endscreen: Sprite = null
+let victim: Sprite = null
 let saviour: Sprite = null
 let objectives_water: TextSprite = null
 let objectives_food: TextSprite = null
