@@ -174,8 +174,8 @@ function create_starting_assets () {
     35,
     5,
     25,
-    9,
-    20,
+    8,
+    23,
     10,
     23,
     7,
@@ -213,8 +213,8 @@ function create_starting_assets () {
     travelling_away_needed = false
     sleeping_allowed = false
     obj_and_eating_toggle = true
-    sticks_brought = 3
-    leaves_brought = 4
+    sticks_brought = 0
+    leaves_brought = 0
     dropped_baggage_needed = 3
     nights_slept = 0
     well_rested = false
@@ -753,6 +753,8 @@ function add_berry (initial_tile: Image, end_tile: Image, berry: Image, berry_na
             tileUtil.replaceAllTiles(initial_tile, end_tile)
             toolbar.get_items().push(Inventory.create_item(berry_name, berry))
             toolbar.update()
+            pause(100)
+            compton_himself.sayText("Berry Obtained!", 500, false)
             if (tutorial_berry == false) {
                 movement = 0
                 everything_toggle(false)
@@ -763,8 +765,6 @@ function add_berry (initial_tile: Image, end_tile: Image, berry: Image, berry_na
                         compton_himself.sayText("Hopefully the search parties find me before then.", 1500, false)
                         timer.after(1500, function () {
                             tutorial_berry = true
-                            pause(100)
-                            compton_himself.sayText("Berry Obtained!", 500, false)
                             everything_toggle(true)
                             timer.after(1000, function () {
                                 movement = 1
